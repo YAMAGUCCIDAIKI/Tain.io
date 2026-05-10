@@ -822,7 +822,7 @@
   <section class="hud" aria-label="状態">
     <div class="hud-row hidden-stat"><span>細胞</span><strong id="cells">1/16</strong></div>
     <div class="hud-row hidden-stat"><span>FPS</span><strong id="fps">60</strong></div>
-    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.04</strong></div>
+    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.05</strong></div>
   </section>
 
   <aside class="board" aria-label="ランキング">
@@ -1028,6 +1028,13 @@
           <input id="mergeCooldownMaxBox" class="max-input" type="number" min="1" step="1" value="60" aria-label="合体時間上限">
         </label>
         <label class="setting-control">
+          <span>中止後合体</span>
+          <input id="mergeCancelCooldownMinBox" class="max-input" type="number" min="0" step="0.1" value="0" aria-label="合体中止後の再合体禁止時間下限">
+          <input id="mergeCancelCooldownSlider" type="range" min="0" max="10" step="0.1" value="3" aria-label="合体中止後の再合体禁止時間">
+          <strong id="mergeCancelCooldownValue">3.0秒</strong>
+          <input id="mergeCancelCooldownMaxBox" class="max-input" type="number" min="0.1" step="0.1" value="10" aria-label="合体中止後の再合体禁止時間上限">
+        </label>
+        <label class="setting-control">
           <span>広さ</span>
           <input id="worldSizeMinBox" class="max-input" type="number" min="2000" step="100" value="2000" aria-label="広さ下限">
           <input id="worldSizeSlider" type="range" min="2000" max="15000" step="100" value="5000" aria-label="サーバーの広さ">
@@ -1140,6 +1147,10 @@
       const mergeCooldownValueEl = document.getElementById("mergeCooldownValue");
       const mergeCooldownMinBox = document.getElementById("mergeCooldownMinBox");
       const mergeCooldownMaxBox = document.getElementById("mergeCooldownMaxBox");
+      const mergeCancelCooldownSlider = document.getElementById("mergeCancelCooldownSlider");
+      const mergeCancelCooldownValueEl = document.getElementById("mergeCancelCooldownValue");
+      const mergeCancelCooldownMinBox = document.getElementById("mergeCancelCooldownMinBox");
+      const mergeCancelCooldownMaxBox = document.getElementById("mergeCancelCooldownMaxBox");
       const worldSizeSlider = document.getElementById("worldSizeSlider");
       const worldSizeValueEl = document.getElementById("worldSizeValue");
       const worldSizeMinBox = document.getElementById("worldSizeMinBox");
@@ -1147,7 +1158,7 @@
       const keyBindButtons = Array.from(document.querySelectorAll("[data-keybind]"));
 
       const TAU = Math.PI * 2;
-      const APP_VERSION = "v2026.05.11.04";
+      const APP_VERSION = "v2026.05.11.05";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -1210,7 +1221,6 @@
       const CELL_MOVE_SPEED_SCALE = 0.52 * GAMEPLAY_SPEED_SCALE;
       const SPLIT_LAUNCH_SPEED_SCALE = GAMEPLAY_SPEED_SCALE;
       const VIRUS_BURST_SPEED_SCALE = GAMEPLAY_SPEED_SCALE;
-      const MERGE_CANCEL_COOLDOWN = 3;
       const MERGE_CAP_OVERSIZE_RATIO = 1.04;
       const EATEN_CELL_RESTORE_WINDOW = 0.55;
       const SPLIT_BOOST_DURATION = 0.08;
@@ -1320,6 +1330,7 @@
           gameSpeed: DEFAULT_GAME_SPEED,
           renderRange: DEFAULT_RENDER_RANGE,
           mergeCooldown: DEFAULT_MERGE_COOLDOWN,
+          mergeCancelCooldown: 3,
           worldSize: WORLD_SIZE,
           cursorLine: true,
           nRespawnEnabled: true,
@@ -1341,6 +1352,7 @@
             gameSpeed: 0.1,
             renderRange: 35,
             mergeCooldown: 0,
+            mergeCancelCooldown: 0,
             worldSize: 2000
           },
           max: {
@@ -1358,6 +1370,7 @@
             gameSpeed: 3,
             renderRange: 120,
             mergeCooldown: 60,
+            mergeCancelCooldown: 10,
             worldSize: 15000
           }
         },
@@ -1734,7 +1747,7 @@
         clampCellToWorld(b);
 
         if (!actor.mergeCancelUntil) actor.mergeCancelUntil = new Map();
-        actor.mergeCancelUntil.set(mergePairKey(a, b), state.now + MERGE_CANCEL_COOLDOWN);
+        actor.mergeCancelUntil.set(mergePairKey(a, b), state.now + state.settings.mergeCancelCooldown);
         clearMergeAttempt(actor, a, b);
       }
 
@@ -2406,6 +2419,7 @@
             gameSpeed: state.settings.gameSpeed,
             renderRange: state.settings.renderRange,
             mergeCooldown: state.settings.mergeCooldown,
+            mergeCancelCooldown: state.settings.mergeCancelCooldown,
             worldSize: state.settings.worldSize,
             cursorLine: state.settings.cursorLine,
             nRespawnEnabled: state.settings.nRespawnEnabled,
@@ -2468,6 +2482,7 @@
           if (Number.isFinite(saved.gameSpeed)) state.settings.gameSpeed = clamp(roundSliderValue("gameSpeed", saved.gameSpeed), state.settings.min.gameSpeed, state.settings.max.gameSpeed);
           if (Number.isFinite(saved.renderRange)) state.settings.renderRange = clamp(roundSliderValue("renderRange", saved.renderRange), state.settings.min.renderRange, state.settings.max.renderRange);
           if (Number.isFinite(saved.mergeCooldown)) state.settings.mergeCooldown = clamp(roundSliderValue("mergeCooldown", saved.mergeCooldown), state.settings.min.mergeCooldown, state.settings.max.mergeCooldown);
+          if (Number.isFinite(saved.mergeCancelCooldown)) state.settings.mergeCancelCooldown = clamp(roundSliderValue("mergeCancelCooldown", saved.mergeCancelCooldown), state.settings.min.mergeCancelCooldown, state.settings.max.mergeCancelCooldown);
           if (Number.isFinite(saved.worldSize)) state.settings.worldSize = clamp(roundSliderValue("worldSize", saved.worldSize), state.settings.min.worldSize, state.settings.max.worldSize);
           if (saved.cursorLine != null) state.settings.cursorLine = Boolean(saved.cursorLine);
           if (saved.nRespawnEnabled != null) state.settings.nRespawnEnabled = Boolean(saved.nRespawnEnabled);
@@ -6461,6 +6476,7 @@
         gameSpeed: { slider: gameSpeedSlider, minBox: gameSpeedMinBox, maxBox: gameSpeedMaxBox, valueEl: gameSpeedValueEl, setting: "gameSpeed", absoluteMin: 0.1, format: formatMultiplier },
         renderRange: { slider: renderRangeSlider, minBox: renderRangeMinBox, maxBox: renderRangeMaxBox, valueEl: renderRangeValueEl, setting: "renderRange", absoluteMin: 35, format: (value) => `${value}%` },
         mergeCooldown: { slider: mergeCooldownSlider, minBox: mergeCooldownMinBox, maxBox: mergeCooldownMaxBox, valueEl: mergeCooldownValueEl, setting: "mergeCooldown", absoluteMin: 0 },
+        mergeCancelCooldown: { slider: mergeCancelCooldownSlider, minBox: mergeCancelCooldownMinBox, maxBox: mergeCancelCooldownMaxBox, valueEl: mergeCancelCooldownValueEl, setting: "mergeCancelCooldown", absoluteMin: 0, format: (value) => `${Number(value).toFixed(1)}秒` },
         worldSize: { slider: worldSizeSlider, minBox: worldSizeMinBox, maxBox: worldSizeMaxBox, valueEl: worldSizeValueEl, setting: "worldSize", absoluteMin: 2000 }
       };
 
@@ -6470,7 +6486,7 @@
         if (kind === "food") return Math.round(raw / 100) * 100;
         if (kind === "ejectSpeed") return Math.round(raw / 10) * 10;
         if (kind === "splitSpeed" || kind === "renderRange") return Math.round(raw / 5) * 5;
-        if (kind === "splitDecayTime") return Math.round(raw * 10) / 10;
+        if (kind === "splitDecayTime" || kind === "mergeCancelCooldown") return Math.round(raw * 10) / 10;
         if (kind === "gameSpeed") return Math.round(raw * 10) / 10;
         if (kind === "worldSize") return Math.round(raw / 100) * 100;
         return Math.round(raw);
@@ -6748,6 +6764,7 @@
         gameSpeedSlider.addEventListener("input", () => setWorldSetting("gameSpeed", gameSpeedSlider.value));
         renderRangeSlider.addEventListener("input", () => setWorldSetting("renderRange", renderRangeSlider.value));
         mergeCooldownSlider.addEventListener("input", () => setWorldSetting("mergeCooldown", mergeCooldownSlider.value));
+        mergeCancelCooldownSlider.addEventListener("input", () => setWorldSetting("mergeCancelCooldown", mergeCancelCooldownSlider.value));
         worldSizeSlider.addEventListener("input", () => setWorldSetting("worldSize", worldSizeSlider.value));
         botMinBox.addEventListener("change", () => setSliderMin("bot", botMinBox.value));
         virusMinBox.addEventListener("change", () => setSliderMin("virus", virusMinBox.value));
@@ -6763,6 +6780,7 @@
         gameSpeedMinBox.addEventListener("change", () => setSliderMin("gameSpeed", gameSpeedMinBox.value));
         renderRangeMinBox.addEventListener("change", () => setSliderMin("renderRange", renderRangeMinBox.value));
         mergeCooldownMinBox.addEventListener("change", () => setSliderMin("mergeCooldown", mergeCooldownMinBox.value));
+        mergeCancelCooldownMinBox.addEventListener("change", () => setSliderMin("mergeCancelCooldown", mergeCancelCooldownMinBox.value));
         worldSizeMinBox.addEventListener("change", () => setSliderMin("worldSize", worldSizeMinBox.value));
         botMaxBox.addEventListener("change", () => setSliderMax("bot", botMaxBox.value));
         virusMaxBox.addEventListener("change", () => setSliderMax("virus", virusMaxBox.value));
@@ -6778,6 +6796,7 @@
         gameSpeedMaxBox.addEventListener("change", () => setSliderMax("gameSpeed", gameSpeedMaxBox.value));
         renderRangeMaxBox.addEventListener("change", () => setSliderMax("renderRange", renderRangeMaxBox.value));
         mergeCooldownMaxBox.addEventListener("change", () => setSliderMax("mergeCooldown", mergeCooldownMaxBox.value));
+        mergeCancelCooldownMaxBox.addEventListener("change", () => setSliderMax("mergeCancelCooldown", mergeCancelCooldownMaxBox.value));
         worldSizeMaxBox.addEventListener("change", () => setSliderMax("worldSize", worldSizeMaxBox.value));
       }
 
