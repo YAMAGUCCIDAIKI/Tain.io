@@ -822,7 +822,7 @@
   <section class="hud" aria-label="状態">
     <div class="hud-row hidden-stat"><span>細胞</span><strong id="cells">1/16</strong></div>
     <div class="hud-row hidden-stat"><span>FPS</span><strong id="fps">60</strong></div>
-    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.02</strong></div>
+    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.03</strong></div>
   </section>
 
   <aside class="board" aria-label="ランキング">
@@ -1147,7 +1147,7 @@
       const keyBindButtons = Array.from(document.querySelectorAll("[data-keybind]"));
 
       const TAU = Math.PI * 2;
-      const APP_VERSION = "v2026.05.11.02";
+      const APP_VERSION = "v2026.05.11.03";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -1730,10 +1730,8 @@
         a.y -= ny * overlap * aShare;
         b.x += nx * overlap * bShare;
         b.y += ny * overlap * bShare;
-        a.x = clamp(a.x, a.radius, WORLD_SIZE - a.radius);
-        a.y = clamp(a.y, a.radius, WORLD_SIZE - a.radius);
-        b.x = clamp(b.x, b.radius, WORLD_SIZE - b.radius);
-        b.y = clamp(b.y, b.radius, WORLD_SIZE - b.radius);
+        clampCellToWorld(a);
+        clampCellToWorld(b);
 
         if (!actor.mergeCancelUntil) actor.mergeCancelUntil = new Map();
         actor.mergeCancelUntil.set(mergePairKey(a, b), state.now + MERGE_SWAP_RESET_TIME);
@@ -3316,12 +3314,8 @@
         const spawnOffset = (source.radius + childRadius) * SPLIT_SPAWN_OFFSET_RATIO;
         const spawnX = originX + dirX * spawnOffset;
         const spawnY = originY + dirY * spawnOffset;
-        const child = createCell(
-          actor,
-          clamp(spawnX, childRadius, WORLD_SIZE - childRadius),
-          clamp(spawnY, childRadius, WORLD_SIZE - childRadius),
-          childMass
-        );
+        const child = createCell(actor, spawnX, spawnY, childMass);
+        clampCellToWorld(child);
         child.vx = source.vx;
         child.vy = source.vy;
         source.faceX = dirX;
@@ -3544,12 +3538,8 @@
             originalRadius + childRadius * 0.45,
             Math.max(childRadius + 3, originalRadius * ringFactor + childRadius * 0.18)
           );
-          const child = createCell(
-            actor,
-            clamp(originX + dirX * spawnDistance, childRadius, WORLD_SIZE - childRadius),
-            clamp(originY + dirY * spawnDistance, childRadius, WORLD_SIZE - childRadius),
-            childMass
-          );
+          const child = createCell(actor, originX + dirX * spawnDistance, originY + dirY * spawnDistance, childMass);
+          clampCellToWorld(child);
           child.vx = cell.vx * 0.04;
           child.vy = cell.vy * 0.04;
           child.faceX = dirX;
@@ -4156,10 +4146,8 @@
                 b.boostY += ny * correction * bShare;
               }
 
-              a.x = clamp(a.x, a.radius, WORLD_SIZE - a.radius);
-              a.y = clamp(a.y, a.radius, WORLD_SIZE - a.radius);
-              b.x = clamp(b.x, b.radius, WORLD_SIZE - b.radius);
-              b.y = clamp(b.y, b.radius, WORLD_SIZE - b.radius);
+              clampCellToWorld(a);
+              clampCellToWorld(b);
 
             }
           }
