@@ -822,7 +822,7 @@
   <section class="hud" aria-label="状態">
     <div class="hud-row hidden-stat"><span>細胞</span><strong id="cells">1/16</strong></div>
     <div class="hud-row hidden-stat"><span>FPS</span><strong id="fps">60</strong></div>
-    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.09.07</strong></div>
+    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.01</strong></div>
   </section>
 
   <aside class="board" aria-label="ランキング">
@@ -1147,7 +1147,7 @@
       const keyBindButtons = Array.from(document.querySelectorAll("[data-keybind]"));
 
       const TAU = Math.PI * 2;
-      const APP_VERSION = "v2026.05.09.07";
+      const APP_VERSION = "v2026.05.11.01";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -2732,6 +2732,16 @@
         cell.boostY *= scale;
       }
 
+      function wallInsetForCell(cell) {
+        return Math.max(1, (cell?.radius || 1) * (2 / 3));
+      }
+
+      function clampCellToWorld(cell, size = WORLD_SIZE) {
+        const inset = wallInsetForCell(cell);
+        cell.x = clamp(cell.x, inset, size - inset);
+        cell.y = clamp(cell.y, inset, size - inset);
+      }
+
       function capVelocity(cell, maxSpeed) {
         const speed = Math.hypot(cell.vx, cell.vy);
         if (speed <= maxSpeed || speed < 0.001) return;
@@ -3271,8 +3281,9 @@
         }
         const remaining = Math.max(0, distance - cell.splitRecoilApplied);
         if (remaining <= 0) return;
-        cell.x = clamp(cell.x - dirX * remaining, cell.radius, WORLD_SIZE - cell.radius);
-        cell.y = clamp(cell.y - dirY * remaining, cell.radius, WORLD_SIZE - cell.radius);
+        cell.x -= dirX * remaining;
+        cell.y -= dirY * remaining;
+        clampCellToWorld(cell);
         cell.splitRecoilApplied += remaining;
       }
 
@@ -4007,22 +4018,23 @@
               refreshCell(cell);
             }
 
-            if (cell.x < cell.radius) {
-              cell.x = cell.radius;
+            const wallInset = wallInsetForCell(cell);
+            if (cell.x < wallInset) {
+              cell.x = wallInset;
               cell.boostX = Math.max(0, cell.boostX);
               cell.vx = Math.max(0, cell.vx);
-            } else if (cell.x > WORLD_SIZE - cell.radius) {
-              cell.x = WORLD_SIZE - cell.radius;
+            } else if (cell.x > WORLD_SIZE - wallInset) {
+              cell.x = WORLD_SIZE - wallInset;
               cell.boostX = Math.min(0, cell.boostX);
               cell.vx = Math.min(0, cell.vx);
             }
 
-            if (cell.y < cell.radius) {
-              cell.y = cell.radius;
+            if (cell.y < wallInset) {
+              cell.y = wallInset;
               cell.boostY = Math.max(0, cell.boostY);
               cell.vy = Math.max(0, cell.vy);
-            } else if (cell.y > WORLD_SIZE - cell.radius) {
-              cell.y = WORLD_SIZE - cell.radius;
+            } else if (cell.y > WORLD_SIZE - wallInset) {
+              cell.y = WORLD_SIZE - wallInset;
               cell.boostY = Math.min(0, cell.boostY);
               cell.vy = Math.min(0, cell.vy);
             }
@@ -4193,8 +4205,7 @@
             cell.y = center.y + ny * hardLimit;
           }
 
-          cell.x = clamp(cell.x, cell.radius, WORLD_SIZE - cell.radius);
-          cell.y = clamp(cell.y, cell.radius, WORLD_SIZE - cell.radius);
+          clampCellToWorld(cell);
         }
       }
 
@@ -5583,8 +5594,9 @@
             }
             const boostSpeed = Math.hypot(cell.boostX || 0, cell.boostY || 0);
             const predictScale = actor.control === "bot" ? 0.62 : 1;
-            cell.x = clamp(cell.x + ((cell.vx || 0) + (cell.boostX || 0)) * dt * predictScale, cell.radius, WORLD_SIZE - cell.radius);
-            cell.y = clamp(cell.y + ((cell.vy || 0) + (cell.boostY || 0)) * dt * predictScale, cell.radius, WORLD_SIZE - cell.radius);
+            cell.x += ((cell.vx || 0) + (cell.boostX || 0)) * dt * predictScale;
+            cell.y += ((cell.vy || 0) + (cell.boostY || 0)) * dt * predictScale;
+            clampCellToWorld(cell);
             if (boostSpeed > 0.02) {
               const decayRate = cell.splitBoostAge > 0 || boostSpeed > 30
                 ? SPLIT_BOOST_DECAY / Math.max(0.1, state.settings.splitDecayTime)
@@ -6557,8 +6569,7 @@
         }
         for (const actor of state.actors) {
           for (const cell of actor.cells) {
-            cell.x = clamp(cell.x, cell.radius, size - cell.radius);
-            cell.y = clamp(cell.y, cell.radius, size - cell.radius);
+            clampCellToWorld(cell, size);
           }
           actor.input.targetX = clamp(actor.input.targetX, 0, size);
           actor.input.targetY = clamp(actor.input.targetY, 0, size);
