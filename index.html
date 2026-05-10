@@ -822,7 +822,7 @@
   <section class="hud" aria-label="状態">
     <div class="hud-row hidden-stat"><span>細胞</span><strong id="cells">1/16</strong></div>
     <div class="hud-row hidden-stat"><span>FPS</span><strong id="fps">60</strong></div>
-    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.03</strong></div>
+    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.04</strong></div>
   </section>
 
   <aside class="board" aria-label="ランキング">
@@ -1147,7 +1147,7 @@
       const keyBindButtons = Array.from(document.querySelectorAll("[data-keybind]"));
 
       const TAU = Math.PI * 2;
-      const APP_VERSION = "v2026.05.11.03";
+      const APP_VERSION = "v2026.05.11.04";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -1210,7 +1210,7 @@
       const CELL_MOVE_SPEED_SCALE = 0.52 * GAMEPLAY_SPEED_SCALE;
       const SPLIT_LAUNCH_SPEED_SCALE = GAMEPLAY_SPEED_SCALE;
       const VIRUS_BURST_SPEED_SCALE = GAMEPLAY_SPEED_SCALE;
-      const MERGE_SWAP_RESET_TIME = 0.22;
+      const MERGE_CANCEL_COOLDOWN = 3;
       const MERGE_CAP_OVERSIZE_RATIO = 1.04;
       const EATEN_CELL_RESTORE_WINDOW = 0.55;
       const SPLIT_BOOST_DURATION = 0.08;
@@ -1734,7 +1734,7 @@
         clampCellToWorld(b);
 
         if (!actor.mergeCancelUntil) actor.mergeCancelUntil = new Map();
-        actor.mergeCancelUntil.set(mergePairKey(a, b), state.now + MERGE_SWAP_RESET_TIME);
+        actor.mergeCancelUntil.set(mergePairKey(a, b), state.now + MERGE_CANCEL_COOLDOWN);
         clearMergeAttempt(actor, a, b);
       }
 
@@ -4036,6 +4036,7 @@
 
       function tryMerge(actor, a, b) {
         if (!canCellMerge(a) || !canCellMerge(b)) return false;
+        if (mergePairCooling(actor, a, b)) return false;
 
         const aMergeMass = mergeAccountingMass(a);
         const bMergeMass = mergeAccountingMass(b);
