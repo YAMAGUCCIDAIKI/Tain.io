@@ -1,3 +1,4 @@
+// 距離計算、重なり面積、合体、捕食判定などの基礎ロジックを定義します。
       function nextId() {
         const id = state.nextId;
         state.nextId += 1;

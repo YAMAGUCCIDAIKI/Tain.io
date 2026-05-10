@@ -1,3 +1,4 @@
+// プレイヤーやbotの個体管理、メニューUI、設定保存と復元を扱います。
       function createActor(id, name, color, isHuman = false, control = null) {
         return {
           id,

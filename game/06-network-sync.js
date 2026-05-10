@@ -1,3 +1,4 @@
+// オンライン接続、状態同期、スナップショット反映を扱います。
       function networkSupported() {
         return typeof RTCPeerConnection === "function";
       }

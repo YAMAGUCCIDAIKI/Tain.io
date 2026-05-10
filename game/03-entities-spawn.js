@@ -1,3 +1,4 @@
+// 細胞、餌、棘、粒などの生成とワールド配置を扱います。
       function createCell(actor, x, y, mass) {
         const cell = {
           id: nextId(),

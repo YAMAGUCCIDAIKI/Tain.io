@@ -1,3 +1,4 @@
+// 細胞の移動、壁判定、衝突解決、捕食更新を扱います。
       function cellSpeed(cell) {
         return clamp(1440 / Math.pow(cell.radius, 0.46), 116, 436) * CELL_MOVE_SPEED_SCALE;
       }

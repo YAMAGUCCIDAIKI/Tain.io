@@ -1,3 +1,4 @@
+// 分裂、粒吐き、棘爆発、botの行動判断を扱います。
       function splitCell(actor, source, dirX, dirY, targetX = null, targetY = null, applyRecoil = true) {
         if (liveCellCount(actor) >= MAX_CELLS) return null;
         if (source.dead || source.mass < MIN_SPLIT_SOURCE_MASS) return null;

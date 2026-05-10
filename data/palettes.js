@@ -1,3 +1,4 @@
+// 餌、プレイヤー、botに使う色パレットを定義します。
 window.TAIN_PALETTES = {
   foodPalette: [
     "#f04438", "#f79009", "#12b76a", "#2e90fa", "#7a5af8",

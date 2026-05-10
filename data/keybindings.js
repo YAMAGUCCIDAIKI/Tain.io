@@ -1,3 +1,4 @@
+// 分裂、粒、別個体操作などの初期キー設定を定義します。
 window.TAIN_DEFAULT_KEY_BINDINGS = {
   split1: "Space",
   split2: "KeyG",

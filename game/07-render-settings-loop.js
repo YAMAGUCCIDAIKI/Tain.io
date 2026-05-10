@@ -1,3 +1,4 @@
+// 描画、設定スライダー、入力イベント、メインループを扱います。
       function visibleWorldBounds(pad = 120) {
         const halfW = state.width * 0.5 / state.camera.zoom;
         const halfH = state.height * 0.5 / state.camera.zoom;
