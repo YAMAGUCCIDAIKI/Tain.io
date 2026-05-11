@@ -140,29 +140,30 @@
       function virusBurstPieceCount(total, slots, liveCells) {
         if (slots <= 1) return 1;
         if (liveCells === MAX_CELLS - 1) return 2;
-        let best = 2;
-        for (let candidate = 2; candidate <= slots; candidate += 1) {
-          const masses = virusBurstMasses(total, candidate, false);
-          if (masses.every((mass) => mass + 0.001 >= MIN_CELL_MASS)) best = candidate;
-          else break;
-        }
-        return best;
+        return clamp(Math.floor(total / MIN_CELL_MASS), 2, slots);
       }
 
       function virusBurstMasses(total, count, forceHalf = false) {
         if (count <= 1) return [total];
         if (forceHalf) return [total * 0.5, total * 0.5];
 
-        const masses = [total * 0.4];
-        let splitSide = total * 0.6;
+        const firstMass = clamp(total * 0.4, MIN_CELL_MASS, total - MIN_CELL_MASS * (count - 1));
+        const masses = [firstMass];
+        let splitSide = total - firstMass;
         while (masses.length < count - 1) {
           const remainingSlots = count - masses.length;
-          if (splitSide / remainingSlots < MIN_SPLIT_SOURCE_MASS || splitSide * 0.5 < MIN_SPLIT_SOURCE_MASS) {
+          const nextSplitSide = splitSide * 0.5;
+          const slotsAfterNextSplit = remainingSlots - 1;
+          if (
+            splitSide / remainingSlots < MIN_SPLIT_SOURCE_MASS ||
+            nextSplitSide < MIN_SPLIT_SOURCE_MASS ||
+            (slotsAfterNextSplit > 0 && nextSplitSide / slotsAfterNextSplit < MIN_CELL_MASS)
+          ) {
             const tailMass = splitSide / remainingSlots;
             while (masses.length < count) masses.push(tailMass);
             return masses;
           }
-          splitSide *= 0.5;
+          splitSide = nextSplitSide;
           masses.push(splitSide);
         }
         masses.push(splitSide);
