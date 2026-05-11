@@ -119,7 +119,7 @@
 
       const externalData = window.TAIN_DATA || {};
       const TAU = Math.PI * 2;
-      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.11";
+      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.12";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;

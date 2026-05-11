@@ -183,6 +183,14 @@
         ctx.fill();
       }
 
+      function cellBorderWidth(radius) {
+        return Math.max(1.5 / state.camera.zoom, radius * 0.03);
+      }
+
+      function shouldDrawCellBorder(radius, actor, renderMode) {
+        return renderMode < 2 || actor.control === "local" || radius * state.camera.zoom > 30;
+      }
+
       function appendPelletPath(entity) {
         const x = entityRenderX(entity);
         const y = entityRenderY(entity);
@@ -315,8 +323,13 @@
         ctx.arc(drawX, drawY, r, 0, TAU);
         ctx.fillStyle = color;
         ctx.fill();
+        if (shouldDrawCellBorder(r, actor, renderMode)) {
+          ctx.lineWidth = cellBorderWidth(r);
+          ctx.strokeStyle = darkenHex(color, 0.12);
+          ctx.stroke();
+        }
 
-        if (scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled)) {
+        if (actor.isHuman && scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled)) {
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           const nameSize = clamp(r * 0.34, 13, 42);
@@ -357,7 +370,7 @@
         const drawY = cell.birthY + (cellY - cell.birthY) * progress;
         const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
         const r = Math.max(1, visualRadius * scale);
-        if (!(scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return;
+        if (!(actor.isHuman && scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const nameSize = clamp(r * 0.34, 13, 42);
@@ -428,7 +441,7 @@
         const drawY = cell.birthY + (cellY - cell.birthY) * progress;
         const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
         const r = Math.max(1, visualRadius * scale);
-        if (!(scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return true;
+        if (!(actor.isHuman && scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return true;
         const nameSize = clamp(r * 0.34, 13, 42);
         const label = displayActorName(actor);
         if (label && !drawPixiText(label, drawX, drawY - nameSize * 0.12, "TainNameFont", nameSize)) return false;
@@ -452,7 +465,7 @@
         const scale = cell.birthScale + (1 - cell.birthScale) * progress;
         const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
         const r = Math.max(1, visualRadius * scale);
-        return scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled);
+        return actor.isHuman && scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled);
       }
 
       function acquirePixiEntityGraphics() {
@@ -686,7 +699,8 @@
         const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
         const r = Math.max(1, visualRadius * scale);
         const color = actorRenderColor(actor);
-        graphics.lineStyle(0, 0, 0);
+        const strokeWidth = shouldDrawCellBorder(r, actor, renderMode) ? cellBorderWidth(r) : 0;
+        graphics.lineStyle(strokeWidth, colorToPixi(darkenHex(color, 0.12), 0x111827), strokeWidth > 0 ? 1 : 0);
         graphics.beginFill(colorToPixi(color, 0xffffff));
         graphics.drawCircle(drawX, drawY, r);
         graphics.endFill();
