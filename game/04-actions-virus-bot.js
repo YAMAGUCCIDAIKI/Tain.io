@@ -113,7 +113,7 @@
       function ejectMass(actor, now, allCells = false) {
         if (now - actor.lastEject < ejectInterval(actor)) return false;
         const ejectMass = state.settings.ejectMass;
-        const ejectCost = ejectMass + 1;
+        const ejectCost = ejectMass;
         const eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
         if (!eligible.length) return false;
         if (allCells) {
