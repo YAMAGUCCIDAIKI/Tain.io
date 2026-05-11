@@ -16,7 +16,7 @@
   <section class="hud" aria-label="状態">
     <div class="hud-row hidden-stat"><span>細胞</span><strong id="cells">1/16</strong></div>
     <div class="hud-row hidden-stat"><span>FPS</span><strong id="fps">60</strong></div>
-    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.12.12</strong></div>
+    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.12.13</strong></div>
   </section>
 
   <aside class="board" aria-label="ランキング">
@@ -128,9 +128,9 @@
         <label class="setting-control">
           <span>Bot連射</span>
           <input id="botEjectRateMinBox" class="max-input" type="number" min="1" step="1" value="1" aria-label="Bot連射下限">
-          <input id="botEjectRateSlider" type="range" min="1" max="256" step="1" value="11" aria-label="Botの粒連射速度">
+          <input id="botEjectRateSlider" type="range" min="1" max="10000" step="1" value="11" aria-label="Botの粒連射速度">
           <strong id="botEjectRateValue">11</strong>
-          <input id="botEjectRateMaxBox" class="max-input" type="number" min="1" step="1" value="256" aria-label="Bot連射上限">
+          <input id="botEjectRateMaxBox" class="max-input" type="number" min="1" step="1" value="10000" aria-label="Bot連射上限">
         </label>
         <label class="setting-control">
           <span>行動</span>
@@ -210,9 +210,9 @@
         <label class="setting-control">
           <span>連射</span>
           <input id="ejectRateMinBox" class="max-input" type="number" min="1" step="1" value="1" aria-label="連射下限">
-          <input id="ejectRateSlider" type="range" min="1" max="256" step="1" value="11" aria-label="粒の連射速度">
+          <input id="ejectRateSlider" type="range" min="1" max="10000" step="1" value="11" aria-label="粒の連射速度">
           <strong id="ejectRateValue">11</strong>
-          <input id="ejectRateMaxBox" class="max-input" type="number" min="1" step="1" value="256" aria-label="連射上限">
+          <input id="ejectRateMaxBox" class="max-input" type="number" min="1" step="1" value="10000" aria-label="連射上限">
         </label>
         <div class="settings-category">ゲーム</div>
         <label class="setting-control">
@@ -256,10 +256,10 @@
   </section>
 
   <script src="https://unpkg.com/pixi.js@7.4.2/dist/pixi.min.js"></script>
-  <script src="./data/version.js?v=v2026.05.12.12"></script>
-  <script src="./data/palettes.js?v=v2026.05.12.12"></script>
-  <script src="./data/keybindings.js?v=v2026.05.12.12"></script>
-  <script src="./data.js?v=v2026.05.12.12"></script>
-  <script src="./script.js?v=v2026.05.12.12"></script>
+  <script src="./data/version.js?v=v2026.05.12.13"></script>
+  <script src="./data/palettes.js?v=v2026.05.12.13"></script>
+  <script src="./data/keybindings.js?v=v2026.05.12.13"></script>
+  <script src="./data.js?v=v2026.05.12.13"></script>
+  <script src="./script.js?v=v2026.05.12.13"></script>
 </body>
 </html>

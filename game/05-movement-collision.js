@@ -811,11 +811,11 @@
           if (state.spectating && actor.control === "local") continue;
           if (actor.input.ejectQueued) {
             // Wキーの単押しでも、現在生きている全細胞から同時に粒を出す。
-            if (ejectMass(actor, now, true) || now - actor.lastEject >= ejectInterval(actor)) {
+            if (ejectMass(actor, now, true, 1) || now - actor.lastEject >= ejectInterval(actor)) {
               actor.input.ejectQueued = false;
             }
           } else if (actorAutoEjectHeld(actor)) {
-            ejectMass(actor, now, true);
+            ejectMass(actor, now, true, maxAutoEjectBurstsPerFrame(actor));
           }
           if (actor.input.splitQueued) {
             if (!actor.input.splitLockActive) {
@@ -880,7 +880,7 @@
         if (state.input.botEjectQueued || state.input.keys.has(state.keyBindings.botEject)) {
           for (const bot of state.actors) {
             if (bot.isHuman) continue;
-            ejectMass(bot, now, true);
+            ejectMass(bot, now, true, maxAutoEjectBurstsPerFrame(bot));
           }
           state.input.botEjectQueued = false;
         }

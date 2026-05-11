@@ -649,3 +649,15 @@
         const rate = actor && !actor.isHuman ? state.settings.botEjectRate : state.settings.ejectRate;
         return 1 / Math.max(1, rate);
       }
+
+      function ejectBurstsThisFrame(actor, now, maxBursts = 1) {
+        const interval = ejectInterval(actor);
+        if (actor.lastEject < -1 || now - actor.lastEject >= 1) return 1;
+        const elapsedBursts = Math.floor((now - actor.lastEject) / interval + 0.0001);
+        return clamp(elapsedBursts, 0, maxBursts);
+      }
+
+      function maxAutoEjectBurstsPerFrame(actor = null) {
+        const rate = actor && !actor.isHuman ? state.settings.botEjectRate : state.settings.ejectRate;
+        return clamp(Math.ceil(Math.max(1, rate) / TARGET_FPS), 1, MAX_EJECT_BURSTS_PER_FRAME);
+      }

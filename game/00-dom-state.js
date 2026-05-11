@@ -119,7 +119,7 @@
 
       const externalData = window.TAIN_DATA || {};
       const TAU = Math.PI * 2;
-      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.12";
+      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.13";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -135,6 +135,8 @@
       const DEFAULT_EJECT_MASS = 21;
       const DEFAULT_EJECT_SPEED = 710;
       const DEFAULT_EJECT_RATE = 11;
+      const MAX_EJECT_RATE = 10000;
+      const MAX_EJECT_BURSTS_PER_FRAME = 512;
       const DEFAULT_SPAWN_MASS = 132;
       const DEFAULT_FOOD_TARGET = 1200;
       const DEFAULT_VIRUS_TARGET = 36;
@@ -294,13 +296,13 @@
           max: {
             bot: 200,
             botSpawnMass: 5000,
-            botEjectRate: TARGET_FPS,
+            botEjectRate: MAX_EJECT_RATE,
             virus: 500,
             food: 100000,
             spawnMass: 5000,
             ejectMass: 80,
             ejectSpeed: 1400,
-            ejectRate: TARGET_FPS,
+            ejectRate: MAX_EJECT_RATE,
             splitRecoil: 40,
             splitSpeed: 300,
             splitDecayTime: 2,

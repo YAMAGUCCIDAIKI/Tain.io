@@ -110,38 +110,53 @@
         });
       }
 
-      function ejectMass(actor, now, allCells = false) {
-        if (now - actor.lastEject < ejectInterval(actor)) return false;
+      function ejectMass(actor, now, allCells = false, maxBursts = 1) {
+        const bursts = ejectBurstsThisFrame(actor, now, maxBursts);
+        if (bursts <= 0) return false;
         const ejectMass = state.settings.ejectMass;
         const ejectCost = ejectMass;
-        const eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
+        const interval = ejectInterval(actor);
+        let anyEmitted = false;
+        let emittedBursts = 0;
+        let eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
         if (!eligible.length) return false;
         if (allCells) {
-          // allCells=true はWキー、連射、Bot粒吐きで使う。対象全細胞を同じフレームで処理する。
-          let emitted = false;
-          for (const cell of eligible) {
-            if (emitFeedFromCell(actor, cell, ejectMass, ejectCost)) emitted = true;
+          for (let burst = 0; burst < bursts; burst += 1) {
+            let emittedThisBurst = false;
+            for (const cell of eligible) {
+              if (emitFeedFromCell(actor, cell, ejectMass, ejectCost)) emittedThisBurst = true;
+            }
+            if (!emittedThisBurst) break;
+            anyEmitted = true;
+            emittedBursts += 1;
+            eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
+            if (!eligible.length) break;
           }
-          if (emitted) actor.lastEject = now;
-          return emitted;
+          if (anyEmitted) actor.lastEject = Math.max(actor.lastEject + emittedBursts * interval, now - interval);
+          return anyEmitted;
         }
 
-        actor.nextEjectIndex %= Math.max(1, actor.cells.length);
-        let cell = null;
-        for (let offset = 0; offset < actor.cells.length; offset += 1) {
-          const candidate = actor.cells[(actor.nextEjectIndex + offset) % actor.cells.length];
-          if (!candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS) {
-            cell = candidate;
-            actor.nextEjectIndex = (actor.cells.indexOf(candidate) + 1) % actor.cells.length;
-            break;
+        for (let burst = 0; burst < bursts; burst += 1) {
+          actor.nextEjectIndex %= Math.max(1, actor.cells.length);
+          let cell = null;
+          for (let offset = 0; offset < actor.cells.length; offset += 1) {
+            const candidate = actor.cells[(actor.nextEjectIndex + offset) % actor.cells.length];
+            if (!candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS) {
+              cell = candidate;
+              actor.nextEjectIndex = (actor.cells.indexOf(candidate) + 1) % actor.cells.length;
+              break;
+            }
           }
+          if (!cell) cell = eligible[0];
+          if (!cell) break;
+          if (!emitFeedFromCell(actor, cell, ejectMass, ejectCost)) break;
+          anyEmitted = true;
+          emittedBursts += 1;
+          eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
+          if (!eligible.length) break;
         }
-        if (!cell) cell = eligible[0];
-        if (!cell) return false;
-
-        const emitted = emitFeedFromCell(actor, cell, ejectMass, ejectCost);
-        if (emitted) actor.lastEject = now;
-        return emitted;
+        if (anyEmitted) actor.lastEject = Math.max(actor.lastEject + emittedBursts * interval, now - interval);
+        return anyEmitted;
       }
 
       function emitFeedFromCell(actor, cell, ejectMass, ejectCost) {
@@ -207,7 +222,7 @@
           cell.targetX = clamp(center.x + Math.cos(angle) * 520, 80, WORLD_SIZE - 80);
           cell.targetY = clamp(center.y + Math.sin(angle) * 520, 80, WORLD_SIZE - 80);
         }
-        ejectMass(bot, now, true);
+        ejectMass(bot, now, true, maxAutoEjectBurstsPerFrame(bot));
         return true;
       }
 
