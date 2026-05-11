@@ -46,8 +46,10 @@
         actor.nextSplitPriority += 1;
         source.separationGraceUntil = state.now + 0.14;
         child.separationGraceUntil = state.now + 0.14;
-        source.vx *= 0.24;
-        source.vy *= 0.24;
+        const sourceWasLaunching = source.launchVelocityAge > 0 || source.splitBoostAge > 0;
+        const sourceVelocityKeep = sourceWasLaunching ? 0.88 : 0.24;
+        source.vx *= sourceVelocityKeep;
+        source.vy *= sourceVelocityKeep;
         source.boostX *= 0.02;
         source.boostY *= 0.02;
         if (applyRecoil) applySplitRecoil(source, dirX, dirY, splitRecoilDistance(child.radius));
