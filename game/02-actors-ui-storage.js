@@ -351,7 +351,7 @@
 
       function displayActorName(actor) {
         if (actor && actor.isHuman) return actor.name || (actor.control === "local" ? "自分" : "P2");
-        return actor ? actor.name : "";
+        return "";
       }
 
       function statusLabel(text) {
@@ -755,8 +755,7 @@
       function createBotActor() {
         const index = state.nextBotIndex;
         state.nextBotIndex += 1;
-        const botName = `${botNames[index % botNames.length]} ${String(index + 1).padStart(2, "0")}`;
-        const bot = createActor(`bot-${index}`, botName, botPalette[index % botPalette.length]);
+        const bot = createActor(`bot-${index}`, "", botPalette[index % botPalette.length]);
         state.actors.push(bot);
         spawnBotActor(bot);
         return bot;

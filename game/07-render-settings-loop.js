@@ -325,16 +325,19 @@
           ctx.strokeStyle = "rgba(8, 18, 32, 0.42)";
           ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
           const label = displayActorName(actor);
-          ctx.strokeText(label, drawX, drawY - nameSize * 0.12);
-          ctx.fillText(label, drawX, drawY - nameSize * 0.12);
+          if (label) {
+            ctx.strokeText(label, drawX, drawY - nameSize * 0.12);
+            ctx.fillText(label, drawX, drawY - nameSize * 0.12);
+          }
 
           const showMass = isLocalViewActor(actor) ? state.settings.showOwnMass : state.settings.showOtherMass;
           if (r * state.camera.zoom > 32 && showMass) {
             const massSize = clamp(r * 0.2, 10, 25);
             ctx.font = `700 ${massSize}px Inter, ui-sans-serif, system-ui, sans-serif`;
             ctx.lineWidth = Math.max(2, massSize * 0.14);
-            ctx.strokeText(String(Math.round(cell.mass)), drawX, drawY + nameSize * 0.62);
-            ctx.fillText(String(Math.round(cell.mass)), drawX, drawY + nameSize * 0.62);
+            const massY = label ? drawY + nameSize * 0.62 : drawY;
+            ctx.strokeText(String(Math.round(cell.mass)), drawX, massY);
+            ctx.fillText(String(Math.round(cell.mass)), drawX, massY);
           }
         }
       }
@@ -363,16 +366,19 @@
         ctx.strokeStyle = "rgba(8, 18, 32, 0.42)";
         ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
         const label = displayActorName(actor);
-        ctx.strokeText(label, drawX, drawY - nameSize * 0.12);
-        ctx.fillText(label, drawX, drawY - nameSize * 0.12);
+        if (label) {
+          ctx.strokeText(label, drawX, drawY - nameSize * 0.12);
+          ctx.fillText(label, drawX, drawY - nameSize * 0.12);
+        }
 
         const showMass = isLocalViewActor(actor) ? state.settings.showOwnMass : state.settings.showOtherMass;
         if (r * state.camera.zoom > 32 && showMass) {
           const massSize = clamp(r * 0.2, 10, 25);
           ctx.font = `700 ${massSize}px Inter, ui-sans-serif, system-ui, sans-serif`;
           ctx.lineWidth = Math.max(2, massSize * 0.14);
-          ctx.strokeText(String(Math.round(cell.mass)), drawX, drawY + nameSize * 0.62);
-          ctx.fillText(String(Math.round(cell.mass)), drawX, drawY + nameSize * 0.62);
+          const massY = label ? drawY + nameSize * 0.62 : drawY;
+          ctx.strokeText(String(Math.round(cell.mass)), drawX, massY);
+          ctx.fillText(String(Math.round(cell.mass)), drawX, massY);
         }
       }
 
@@ -424,12 +430,13 @@
         const r = Math.max(1, visualRadius * scale);
         if (!(scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return true;
         const nameSize = clamp(r * 0.34, 13, 42);
-        if (!drawPixiText(displayActorName(actor), drawX, drawY - nameSize * 0.12, "TainNameFont", nameSize)) return false;
+        const label = displayActorName(actor);
+        if (label && !drawPixiText(label, drawX, drawY - nameSize * 0.12, "TainNameFont", nameSize)) return false;
 
         const showMass = isLocalViewActor(actor) ? state.settings.showOwnMass : state.settings.showOtherMass;
         if (r * state.camera.zoom > 32 && showMass) {
           const massSize = clamp(r * 0.2, 10, 25);
-          drawPixiText(Math.round(cell.mass), drawX, drawY + nameSize * 0.62, "TainMassFont", massSize);
+          drawPixiText(Math.round(cell.mass), drawX, label ? drawY + nameSize * 0.62 : drawY, "TainMassFont", massSize);
         }
         return true;
       }
