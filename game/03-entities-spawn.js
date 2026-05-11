@@ -157,7 +157,7 @@
         let splitSide = total * 0.6;
         while (masses.length < count - 1) {
           const remainingSlots = count - masses.length;
-          if (splitSide * 0.5 < MIN_SPLIT_SOURCE_MASS) {
+          if (splitSide / remainingSlots < MIN_SPLIT_SOURCE_MASS || splitSide * 0.5 < MIN_SPLIT_SOURCE_MASS) {
             const tailMass = splitSide / remainingSlots;
             while (masses.length < count) masses.push(tailMass);
             return masses;
