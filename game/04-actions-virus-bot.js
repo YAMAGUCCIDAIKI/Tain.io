@@ -117,6 +117,7 @@
         const eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
         if (!eligible.length) return false;
         if (allCells) {
+          // allCells=true はWキー、連射、Bot粒吐きで使う。対象全細胞を同じフレームで処理する。
           let emitted = false;
           for (const cell of eligible) {
             if (emitFeedFromCell(actor, cell, ejectMass, ejectCost)) emitted = true;
@@ -144,6 +145,7 @@
       }
 
       function emitFeedFromCell(actor, cell, ejectMass, ejectCost) {
+        // 吐く粒の質量と細胞から減る質量を同じにして、表示面積と実際の養分を一致させる。
         const targetX = isPlayerControlled(actor) ? actor.input.targetX : cell.targetX;
         const targetY = isPlayerControlled(actor) ? actor.input.targetY : cell.targetY;
         const n = normalized(targetX - cell.x, targetY - cell.y, actor.input.lastAimX, actor.input.lastAimY);

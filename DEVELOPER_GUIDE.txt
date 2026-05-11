@@ -1,0 +1,68 @@
+Tain.io 開発者向け編集メモ
+
+このプロジェクトは静的ファイルだけで動く構成です。Node.js 用サーバーは使いません。
+
+主なファイルの役割
+
+index.html
+- 画面に出るメニュー、ボタン、スライダー、script 読み込みを定義します。
+- 新しい設定スライダーを作る場合は、ここに label、range input、値表示 strong、下限/上限 input を追加します。
+- script の末尾についている ?v=v2026... はブラウザキャッシュ回避用です。バージョン更新時はここも更新します。
+
+styles.css
+- メニュー、HUD、ランキング、スライダーなどの見た目を定義します。
+- 新しいUIを追加して崩れる場合は、まずここで幅、grid、余白を調整します。
+
+data/version.js
+- 画面に表示するバージョン番号を定義します。
+- 毎回変更時はこの値を上げます。
+
+data.js
+- data/version.js、data/palettes.js、data/keybindings.js の内容を TAIN_DATA にまとめます。
+- APP_VERSION の fallback も現在のバージョンに合わせます。
+
+script.js
+- game フォルダ内の分割JSを順番に読み込みます。
+- 新しい game/*.js を追加した場合は GAME_CHUNKS にファイル名を追加します。
+
+game/00-dom-state.js
+- DOM参照、定数、state.settings の初期値、スライダーの min/max を定義します。
+- 新しい設定値を追加する場合は、DOM参照、state.settings、state.settings.min、state.settings.max を追加します。
+
+game/02-actors-ui-storage.js
+- プレイヤー/Botの actor 作成、プロフィール、ローカル設定保存を扱います。
+- 新しい設定値を保存したい場合は saveLocalPreferences と loadLocalPreferences に追加します。
+
+game/03-entities-spawn.js
+- 細胞、ペレット、粒、棘の生成と、半径・質量に関係する処理を扱います。
+- 質量と見た目の大きさを変えたい場合は radiusFromMass と createFeed/createCell 周辺を確認します。
+
+game/04-actions-virus-bot.js
+- 分裂、粒吐き、棘爆発、Bot行動を扱います。
+- Botの新しい行動モードを追加する場合は updateBotAI に分岐を追加します。
+- 粒吐きは ejectMass と emitFeedFromCell が中心です。
+
+game/05-movement-collision.js
+- 移動、壁、捕食、Wキーなどプレイヤー入力処理を扱います。
+- Wで全細胞から粒を出す処理は processPlayerControls の ejectMass(actor, now, true) です。
+
+game/06-network-sync.js
+- オンライン同期用のスナップショット、入力、設定反映を扱います。
+- 新しい設定をオンラインでも反映したい場合は snapshot の settings と受信側の settings 反映処理に追加します。
+
+game/07-render-settings-loop.js
+- 描画、設定スライダー、入力イベント、メインループを扱います。
+- 新しいスライダーを追加する場合は sliderControls に追加し、bindInput 内で input/change イベントを接続します。
+
+例: 「Botの移動速度を何倍にする」スライダーを作る場合
+
+1. index.html のBOT設定欄に botMoveSpeedMultiplier 用のスライダーUIを追加します。
+2. game/00-dom-state.js に botMoveSpeedMultiplierSlider などの DOM 参照を追加します。
+3. game/00-dom-state.js の state.settings に botMoveSpeedMultiplier、min/max に同じキーを追加します。
+4. game/07-render-settings-loop.js の sliderControls に botMoveSpeedMultiplier を追加します。
+5. game/07-render-settings-loop.js の bindInput に slider/min/max のイベントを追加します。
+6. game/02-actors-ui-storage.js の saveLocalPreferences/loadLocalPreferences に保存処理を追加します。
+7. game/04-actions-virus-bot.js または game/05-movement-collision.js のBot移動速度計算で state.settings.botMoveSpeedMultiplier を掛けます。
+8. オンラインでも使う場合は game/06-network-sync.js の settings 送受信に追加します。
+9. data/version.js、data.js、index.html の script クエリのバージョンを上げます。
+10. 変更後は JS 構文チェックと game/*.js の結合チェックを行います。

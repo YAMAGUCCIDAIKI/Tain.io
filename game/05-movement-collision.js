@@ -798,7 +798,8 @@
           if (!isPlayerControlled(actor)) continue;
           if (state.spectating && actor.control === "local") continue;
           if (actor.input.ejectQueued) {
-            if (ejectMass(actor, now) || now - actor.lastEject >= ejectInterval()) {
+            // Wキーの単押しでも、現在生きている全細胞から同時に粒を出す。
+            if (ejectMass(actor, now, true) || now - actor.lastEject >= ejectInterval(actor)) {
               actor.input.ejectQueued = false;
             }
           } else if (actorAutoEjectHeld(actor)) {

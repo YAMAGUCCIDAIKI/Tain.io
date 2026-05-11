@@ -479,6 +479,7 @@
       }
 
       const sliderControls = {
+        // 新しいスライダーを追加する時は、HTMLのinput群、state.settings、ここを同じキー名でそろえる。
         bot: { slider: botSlider, minBox: botMinBox, maxBox: botMaxBox, valueEl: botValueEl, setting: "botTarget", absoluteMin: 0 },
         botSpawnMass: { slider: botSpawnMassSlider, minBox: botSpawnMassMinBox, maxBox: botSpawnMassMaxBox, valueEl: botSpawnMassValueEl, setting: "botSpawnMass", absoluteMin: MIN_CELL_MASS },
         botEjectRate: { slider: botEjectRateSlider, minBox: botEjectRateMinBox, maxBox: botEjectRateMaxBox, valueEl: botEjectRateValueEl, setting: "botEjectRate", absoluteMin: 1 },
