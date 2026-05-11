@@ -707,7 +707,7 @@
             gameSpeed: state.settings.gameSpeed,
             botEnabled: state.settings.botEnabled,
             botSpawnMass: state.settings.botSpawnMass,
-            botEjectSpeed: state.settings.botEjectSpeed,
+            botEjectRate: state.settings.botEjectRate,
             nRespawnEnabled: state.settings.nRespawnEnabled
           },
           partialActors: true,
@@ -1198,12 +1198,12 @@
             state.settings.max.botSpawnMass = nextMax;
             state.settings.botSpawnMass = nextValue;
           }
-          if (Number.isFinite(message.settings.botEjectSpeed)) {
-            const nextMax = Math.max(state.settings.max.botEjectSpeed, message.settings.botEjectSpeed);
-            const nextValue = clamp(Math.round(message.settings.botEjectSpeed / 10) * 10, state.settings.min.botEjectSpeed, nextMax);
-            settingsChanged = settingsChanged || nextMax !== state.settings.max.botEjectSpeed || nextValue !== state.settings.botEjectSpeed;
-            state.settings.max.botEjectSpeed = nextMax;
-            state.settings.botEjectSpeed = nextValue;
+          if (Number.isFinite(message.settings.botEjectRate)) {
+            const nextMax = Math.max(state.settings.max.botEjectRate, message.settings.botEjectRate);
+            const nextValue = clamp(Math.round(message.settings.botEjectRate), state.settings.min.botEjectRate, nextMax);
+            settingsChanged = settingsChanged || nextMax !== state.settings.max.botEjectRate || nextValue !== state.settings.botEjectRate;
+            state.settings.max.botEjectRate = nextMax;
+            state.settings.botEjectRate = nextValue;
           }
           if (Number.isFinite(message.settings.gameSpeed)) {
             const nextMax = Math.max(state.settings.max.gameSpeed, message.settings.gameSpeed);

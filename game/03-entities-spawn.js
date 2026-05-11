@@ -627,6 +627,7 @@
         cell.splitRecoilApplied += remaining;
       }
 
-      function ejectInterval() {
-        return 1 / Math.max(1, state.settings.ejectRate);
+      function ejectInterval(actor = null) {
+        const rate = actor && !actor.isHuman ? state.settings.botEjectRate : state.settings.ejectRate;
+        return 1 / Math.max(1, rate);
       }

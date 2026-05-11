@@ -50,10 +50,10 @@
       const botSpawnMassValueEl = document.getElementById("botSpawnMassValue");
       const botSpawnMassMinBox = document.getElementById("botSpawnMassMinBox");
       const botSpawnMassMaxBox = document.getElementById("botSpawnMassMaxBox");
-      const botEjectSpeedSlider = document.getElementById("botEjectSpeedSlider");
-      const botEjectSpeedValueEl = document.getElementById("botEjectSpeedValue");
-      const botEjectSpeedMinBox = document.getElementById("botEjectSpeedMinBox");
-      const botEjectSpeedMaxBox = document.getElementById("botEjectSpeedMaxBox");
+      const botEjectRateSlider = document.getElementById("botEjectRateSlider");
+      const botEjectRateValueEl = document.getElementById("botEjectRateValue");
+      const botEjectRateMinBox = document.getElementById("botEjectRateMinBox");
+      const botEjectRateMaxBox = document.getElementById("botEjectRateMaxBox");
       const botModeSelect = document.getElementById("botModeSelect");
       const virusSlider = document.getElementById("virusSlider");
       const virusValueEl = document.getElementById("virusValue");
@@ -119,7 +119,7 @@
 
       const externalData = window.TAIN_DATA || {};
       const TAU = Math.PI * 2;
-      const APP_VERSION = externalData.APP_VERSION || "v2026.05.11.14";
+      const APP_VERSION = externalData.APP_VERSION || "v2026.05.11.15";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -255,7 +255,7 @@
           botTarget: DEFAULT_BOT_COUNT,
           botMode: "hunt",
           botSpawnMass: BOT_SPAWN_MASS,
-          botEjectSpeed: DEFAULT_EJECT_SPEED,
+          botEjectRate: DEFAULT_EJECT_RATE,
           virusTarget: DEFAULT_VIRUS_TARGET,
           foodTarget: DEFAULT_FOOD_TARGET,
           spawnMass: DEFAULT_SPAWN_MASS,
@@ -279,7 +279,7 @@
           min: {
             bot: 0,
             botSpawnMass: MIN_CELL_MASS,
-            botEjectSpeed: 300,
+            botEjectRate: 1,
             virus: 0,
             food: 0,
             spawnMass: 132,
@@ -299,7 +299,7 @@
           max: {
             bot: 200,
             botSpawnMass: 5000,
-            botEjectSpeed: 1400,
+            botEjectRate: 50,
             virus: 500,
             food: 100000,
             spawnMass: 5000,

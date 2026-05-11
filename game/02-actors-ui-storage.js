@@ -504,7 +504,7 @@
             botTarget: state.settings.botTarget,
             botMode: state.settings.botMode,
             botSpawnMass: state.settings.botSpawnMass,
-            botEjectSpeed: state.settings.botEjectSpeed,
+            botEjectRate: state.settings.botEjectRate,
             virusTarget: state.settings.virusTarget,
             foodTarget: state.settings.foodTarget,
             spawnMass: state.settings.spawnMass,
@@ -570,7 +570,7 @@
           if (Number.isFinite(saved.botTarget)) state.settings.botTarget = clamp(roundSliderValue("bot", saved.botTarget), state.settings.min.bot, state.settings.max.bot);
           if (["hunt", "chase", "virus", "cursor", "eject"].includes(saved.botMode)) state.settings.botMode = saved.botMode;
           if (Number.isFinite(saved.botSpawnMass)) state.settings.botSpawnMass = clamp(roundSliderValue("botSpawnMass", saved.botSpawnMass), state.settings.min.botSpawnMass, state.settings.max.botSpawnMass);
-          if (Number.isFinite(saved.botEjectSpeed)) state.settings.botEjectSpeed = clamp(roundSliderValue("botEjectSpeed", saved.botEjectSpeed), state.settings.min.botEjectSpeed, state.settings.max.botEjectSpeed);
+          if (Number.isFinite(saved.botEjectRate)) state.settings.botEjectRate = clamp(roundSliderValue("botEjectRate", saved.botEjectRate), state.settings.min.botEjectRate, state.settings.max.botEjectRate);
           if (Number.isFinite(saved.virusTarget)) state.settings.virusTarget = clamp(roundSliderValue("virus", saved.virusTarget), state.settings.min.virus, state.settings.max.virus);
           if (Number.isFinite(saved.foodTarget)) state.settings.foodTarget = clamp(roundSliderValue("food", saved.foodTarget), state.settings.min.food, state.settings.max.food);
           if (Number.isFinite(saved.spawnMass)) state.settings.spawnMass = clamp(roundSliderValue("spawnMass", saved.spawnMass), state.settings.min.spawnMass, state.settings.max.spawnMass);

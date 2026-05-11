@@ -109,7 +109,7 @@
       }
 
       function ejectMass(actor, now, allCells = false) {
-        if (now - actor.lastEject < ejectInterval()) return false;
+        if (now - actor.lastEject < ejectInterval(actor)) return false;
         const ejectMass = state.settings.ejectMass;
         const ejectCost = ejectMass + 1;
         const eligible = actor.cells.filter((candidate) => !candidate.dead && candidate.mass >= MIN_EJECT_SOURCE_MASS);
@@ -153,8 +153,7 @@
         refreshCell(cell);
         const startX = cell.x + n.x * (cell.radius + 18);
         const startY = cell.y + n.y * (cell.radius + 18);
-        const feedSpeed = actor.isHuman ? state.settings.ejectSpeed : state.settings.botEjectSpeed;
-        const feed = createFeed(startX, startY, n.x, n.y, actor.color, actor.id, feedSpeed, ejectMass);
+        const feed = createFeed(startX, startY, n.x, n.y, actor.color, actor.id, state.settings.ejectSpeed, ejectMass);
         feed.vx += cell.vx * 0.25 + cell.boostX * 0.08;
         feed.vy += cell.vy * 0.25 + cell.boostY * 0.08;
         return true;
