@@ -420,7 +420,7 @@
 
       function findBotSpawnPosition(mass) {
         const radius = radiusFromMass(mass);
-        return findRandomSafeSpawnPosition(radius, Math.max(1, radius * 0.34), 120, {
+        return findRandomSafeSpawnPosition(radius, 20, 120, {
           avoidViruses: true,
           virusPadding: 90,
           cellPadding: 140,
