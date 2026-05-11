@@ -14,9 +14,11 @@
   ];
 
   async function loadGame() {
-    const baseUrl = new URL("./game/", document.currentScript.src);
+    const loaderUrl = new URL(document.currentScript.src);
+    const baseUrl = new URL("./game/", loaderUrl);
     const sources = await Promise.all(GAME_CHUNKS.map(async (file) => {
       const url = new URL(file, baseUrl);
+      url.search = loaderUrl.search;
       const response = await fetch(url);
       if (!response.ok) throw new Error(`${file}: ${response.status}`);
       return `${await response.text()}\n//# sourceURL=${url.href}`;
