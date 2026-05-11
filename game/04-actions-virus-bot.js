@@ -195,7 +195,7 @@
         const liveCells = bot.cells.filter((cell) => !cell.dead);
         const canEject = liveCells.some((cell) => cell.mass >= MIN_EJECT_SOURCE_MASS);
         if (!canEject) {
-          spawnActor(bot, botSpawnMass());
+          spawnBotActor(bot);
           return true;
         }
 

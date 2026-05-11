@@ -667,7 +667,7 @@
               if (actor.respawnAt <= 0) {
                 actor.respawnAt = state.now + 0.5;
               } else if (state.now >= actor.respawnAt) {
-                spawnActor(actor, botSpawnMass());
+                spawnBotActor(actor);
               }
             }
           }

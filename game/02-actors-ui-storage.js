@@ -186,6 +186,12 @@
         return clamp(Math.round(Number(state.settings.botSpawnMass) || BOT_SPAWN_MASS), MIN_CELL_MASS, state.settings.max.botSpawnMass);
       }
 
+      function spawnBotActor(bot) {
+        const mass = botSpawnMass();
+        const pos = findBotSpawnPosition(mass);
+        spawnActor(bot, mass, pos.x, pos.y);
+      }
+
       function applyLocalProfile() {
         syncProfileFromInputs();
         for (const actor of localHumanActors()) {
@@ -752,9 +758,7 @@
         const botName = `${botNames[index % botNames.length]} ${String(index + 1).padStart(2, "0")}`;
         const bot = createActor(`bot-${index}`, botName, botPalette[index % botPalette.length]);
         state.actors.push(bot);
-        const mass = botSpawnMass();
-        const pos = findBotSpawnPosition(mass);
-        spawnActor(bot, mass, pos.x, pos.y);
+        spawnBotActor(bot);
         return bot;
       }
 
