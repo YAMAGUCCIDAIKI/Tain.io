@@ -315,11 +315,6 @@
         ctx.arc(drawX, drawY, r, 0, TAU);
         ctx.fillStyle = color;
         ctx.fill();
-        if (renderMode < 2 || localControlled || r * state.camera.zoom > 28) {
-          ctx.lineWidth = Math.max(3 / state.camera.zoom, isActiveLocalActor(actor) ? r * 0.075 : r * 0.045);
-          ctx.strokeStyle = darkenHex(color, isActiveLocalActor(actor) ? 0.08 : 0.12);
-          ctx.stroke();
-        }
 
         if (scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled)) {
           ctx.textAlign = "center";
@@ -437,6 +432,20 @@
           drawPixiText(Math.round(cell.mass), drawX, drawY + nameSize * 0.62, "TainMassFont", massSize);
         }
         return true;
+      }
+
+      function shouldDrawPixiCellLabel(cell, renderMode = 0) {
+        const actor = cell.actor;
+        const localControlled = actor.control === "local";
+        let progress = 1;
+        if (cell.birthDuration > 0 && cell.birthAge < cell.birthDuration) {
+          progress = clamp(cell.birthAge / cell.birthDuration, 0, 1);
+          progress = 1 - Math.pow(1 - progress, 3);
+        }
+        const scale = cell.birthScale + (1 - cell.birthScale) * progress;
+        const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
+        const r = Math.max(1, visualRadius * scale);
+        return scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled);
       }
 
       function acquirePixiEntityGraphics() {
@@ -670,14 +679,7 @@
         const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
         const r = Math.max(1, visualRadius * scale);
         const color = actorRenderColor(actor);
-        const localControlled = actor.control === "local";
-        const needsStroke = renderMode < 2 || localControlled || r * state.camera.zoom > 28;
-        if (needsStroke) {
-          const stroke = darkenHex(color, isActiveLocalActor(actor) ? 0.08 : 0.12);
-          graphics.lineStyle(Math.max(3 / state.camera.zoom, isActiveLocalActor(actor) ? r * 0.075 : r * 0.045), colorToPixi(stroke, 0x111827), 1);
-        } else {
-          graphics.lineStyle(0, 0, 0);
-        }
+        graphics.lineStyle(0, 0, 0);
         graphics.beginFill(colorToPixi(color, 0xffffff));
         graphics.drawCircle(drawX, drawY, r);
         graphics.endFill();
@@ -692,11 +694,12 @@
             drawPixiVirus(graphics, item.entity);
             continue;
           }
+          const labelNeedsOwnLayer = pixiState.bitmapFontsReady && shouldDrawPixiCellLabel(item.entity, renderMode);
           drawPixiCell(graphics, item.entity, renderMode);
-          if (pixiState.bitmapFontsReady && !drawPixiCellLabel(item.entity, renderMode)) {
+          if (labelNeedsOwnLayer && !drawPixiCellLabel(item.entity, renderMode)) {
             detailCellsScratch.push(item.entity);
           }
-          graphics = acquirePixiEntityGraphics();
+          if (labelNeedsOwnLayer) graphics = acquirePixiEntityGraphics();
         }
         hideUnusedPixiEntityGraphics();
       }
