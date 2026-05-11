@@ -182,6 +182,10 @@
         return clamp(Math.round(Number(state.settings.spawnMass) || DEFAULT_SPAWN_MASS), MIN_CELL_MASS, state.settings.max.spawnMass);
       }
 
+      function botSpawnMass() {
+        return clamp(Math.round(Number(state.settings.botSpawnMass) || BOT_SPAWN_MASS), MIN_CELL_MASS, state.settings.max.botSpawnMass);
+      }
+
       function applyLocalProfile() {
         syncProfileFromInputs();
         for (const actor of localHumanActors()) {
@@ -499,6 +503,8 @@
             botEnabled: state.settings.botEnabled,
             botTarget: state.settings.botTarget,
             botMode: state.settings.botMode,
+            botSpawnMass: state.settings.botSpawnMass,
+            botEjectSpeed: state.settings.botEjectSpeed,
             virusTarget: state.settings.virusTarget,
             foodTarget: state.settings.foodTarget,
             spawnMass: state.settings.spawnMass,
@@ -563,6 +569,8 @@
           if (saved.botEnabled != null) state.settings.botEnabled = Boolean(saved.botEnabled);
           if (Number.isFinite(saved.botTarget)) state.settings.botTarget = clamp(roundSliderValue("bot", saved.botTarget), state.settings.min.bot, state.settings.max.bot);
           if (["hunt", "chase", "virus", "cursor", "eject"].includes(saved.botMode)) state.settings.botMode = saved.botMode;
+          if (Number.isFinite(saved.botSpawnMass)) state.settings.botSpawnMass = clamp(roundSliderValue("botSpawnMass", saved.botSpawnMass), state.settings.min.botSpawnMass, state.settings.max.botSpawnMass);
+          if (Number.isFinite(saved.botEjectSpeed)) state.settings.botEjectSpeed = clamp(roundSliderValue("botEjectSpeed", saved.botEjectSpeed), state.settings.min.botEjectSpeed, state.settings.max.botEjectSpeed);
           if (Number.isFinite(saved.virusTarget)) state.settings.virusTarget = clamp(roundSliderValue("virus", saved.virusTarget), state.settings.min.virus, state.settings.max.virus);
           if (Number.isFinite(saved.foodTarget)) state.settings.foodTarget = clamp(roundSliderValue("food", saved.foodTarget), state.settings.min.food, state.settings.max.food);
           if (Number.isFinite(saved.spawnMass)) state.settings.spawnMass = clamp(roundSliderValue("spawnMass", saved.spawnMass), state.settings.min.spawnMass, state.settings.max.spawnMass);
@@ -742,7 +750,7 @@
         const botName = `${botNames[index % botNames.length]} ${String(index + 1).padStart(2, "0")}`;
         const bot = createActor(`bot-${index}`, botName, botPalette[index % botPalette.length]);
         state.actors.push(bot);
-        spawnActor(bot, BOT_SPAWN_MASS);
+        spawnActor(bot, botSpawnMass());
         return bot;
       }
 

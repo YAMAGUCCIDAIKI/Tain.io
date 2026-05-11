@@ -480,6 +480,8 @@
 
       const sliderControls = {
         bot: { slider: botSlider, minBox: botMinBox, maxBox: botMaxBox, valueEl: botValueEl, setting: "botTarget", absoluteMin: 0 },
+        botSpawnMass: { slider: botSpawnMassSlider, minBox: botSpawnMassMinBox, maxBox: botSpawnMassMaxBox, valueEl: botSpawnMassValueEl, setting: "botSpawnMass", absoluteMin: MIN_CELL_MASS },
+        botEjectSpeed: { slider: botEjectSpeedSlider, minBox: botEjectSpeedMinBox, maxBox: botEjectSpeedMaxBox, valueEl: botEjectSpeedValueEl, setting: "botEjectSpeed", absoluteMin: 300 },
         virus: { slider: virusSlider, minBox: virusMinBox, maxBox: virusMaxBox, valueEl: virusValueEl, setting: "virusTarget", absoluteMin: 0 },
         food: { slider: foodSlider, minBox: foodMinBox, maxBox: foodMaxBox, valueEl: foodValueEl, setting: "foodTarget", absoluteMin: 0 },
         spawnMass: { slider: spawnMassSlider, minBox: spawnMassMinBox, maxBox: spawnMassMaxBox, valueEl: spawnMassValueEl, setting: "spawnMass", absoluteMin: 132 },
@@ -501,7 +503,7 @@
         const raw = Number(value);
         if (!Number.isFinite(raw)) return sliderControls[kind]?.absoluteMin ?? 0;
         if (kind === "food") return Math.round(raw / 100) * 100;
-        if (kind === "ejectSpeed") return Math.round(raw / 10) * 10;
+        if (kind === "ejectSpeed" || kind === "botEjectSpeed") return Math.round(raw / 10) * 10;
         if (kind === "splitInputSpeed") return Math.round(raw / 10) * 10;
         if (kind === "splitSpeed" || kind === "renderRange") return Math.round(raw / 5) * 5;
         if (kind === "splitDecayTime" || kind === "mergeCancelCooldown") return Math.round(raw * 10) / 10;
@@ -544,6 +546,8 @@
         botEnabledToggle.checked = state.settings.botEnabled;
         botEnabledValueEl.textContent = state.settings.botEnabled ? "ON" : "OFF";
         botSlider.disabled = !state.settings.botEnabled;
+        botSpawnMassSlider.disabled = !state.settings.botEnabled;
+        botEjectSpeedSlider.disabled = !state.settings.botEnabled;
         botModeSelect.disabled = !state.settings.botEnabled;
         for (const [kind, config] of Object.entries(sliderControls)) {
           const value = state.settings[config.setting];
@@ -767,6 +771,8 @@
         ownMassToggle.addEventListener("change", () => setWorldSetting("showOwnMass", ownMassToggle.checked));
         botEnabledToggle.addEventListener("change", () => setWorldSetting("botEnabled", botEnabledToggle.checked));
         botSlider.addEventListener("input", () => setWorldSetting("bot", botSlider.value));
+        botSpawnMassSlider.addEventListener("input", () => setWorldSetting("botSpawnMass", botSpawnMassSlider.value));
+        botEjectSpeedSlider.addEventListener("input", () => setWorldSetting("botEjectSpeed", botEjectSpeedSlider.value));
         botModeSelect.addEventListener("change", () => setWorldSetting("botMode", botModeSelect.value));
         virusSlider.addEventListener("input", () => setWorldSetting("virus", virusSlider.value));
         foodSlider.addEventListener("input", () => setWorldSetting("food", foodSlider.value));
@@ -784,6 +790,8 @@
         mergeCancelCooldownSlider.addEventListener("input", () => setWorldSetting("mergeCancelCooldown", mergeCancelCooldownSlider.value));
         worldSizeSlider.addEventListener("input", () => setWorldSetting("worldSize", worldSizeSlider.value));
         botMinBox.addEventListener("change", () => setSliderMin("bot", botMinBox.value));
+        botSpawnMassMinBox.addEventListener("change", () => setSliderMin("botSpawnMass", botSpawnMassMinBox.value));
+        botEjectSpeedMinBox.addEventListener("change", () => setSliderMin("botEjectSpeed", botEjectSpeedMinBox.value));
         virusMinBox.addEventListener("change", () => setSliderMin("virus", virusMinBox.value));
         foodMinBox.addEventListener("change", () => setSliderMin("food", foodMinBox.value));
         spawnMassMinBox.addEventListener("change", () => setSliderMin("spawnMass", spawnMassMinBox.value));
@@ -800,6 +808,8 @@
         mergeCancelCooldownMinBox.addEventListener("change", () => setSliderMin("mergeCancelCooldown", mergeCancelCooldownMinBox.value));
         worldSizeMinBox.addEventListener("change", () => setSliderMin("worldSize", worldSizeMinBox.value));
         botMaxBox.addEventListener("change", () => setSliderMax("bot", botMaxBox.value));
+        botSpawnMassMaxBox.addEventListener("change", () => setSliderMax("botSpawnMass", botSpawnMassMaxBox.value));
+        botEjectSpeedMaxBox.addEventListener("change", () => setSliderMax("botEjectSpeed", botEjectSpeedMaxBox.value));
         virusMaxBox.addEventListener("change", () => setSliderMax("virus", virusMaxBox.value));
         foodMaxBox.addEventListener("change", () => setSliderMax("food", foodMaxBox.value));
         spawnMassMaxBox.addEventListener("change", () => setSliderMax("spawnMass", spawnMassMaxBox.value));

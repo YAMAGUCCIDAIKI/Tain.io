@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -16,7 +16,7 @@
   <section class="hud" aria-label="状態">
     <div class="hud-row hidden-stat"><span>細胞</span><strong id="cells">1/16</strong></div>
     <div class="hud-row hidden-stat"><span>FPS</span><strong id="fps">60</strong></div>
-    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.13</strong></div>
+    <div class="hud-row version-row"><span>Ver</span><strong id="version">v2026.05.11.14</strong></div>
   </section>
 
   <aside class="board" aria-label="ランキング">
@@ -117,6 +117,20 @@
           <input id="botSlider" type="range" min="0" max="200" step="1" value="100" aria-label="ボット数">
           <strong id="botValue">100</strong>
           <input id="botMaxBox" class="max-input" type="number" min="1" step="1" value="200" aria-label="ボット上限">
+        </label>
+        <label class="setting-control">
+          <span>Bot初期マス</span>
+          <input id="botSpawnMassMinBox" class="max-input" type="number" min="12" step="1" value="12" aria-label="Bot初期マス下限">
+          <input id="botSpawnMassSlider" type="range" min="12" max="5000" step="1" value="132" aria-label="Bot初期マス">
+          <strong id="botSpawnMassValue">132</strong>
+          <input id="botSpawnMassMaxBox" class="max-input" type="number" min="12" step="1" value="5000" aria-label="Bot初期マス上限">
+        </label>
+        <label class="setting-control">
+          <span>Bot粒速度</span>
+          <input id="botEjectSpeedMinBox" class="max-input" type="number" min="300" step="10" value="300" aria-label="Bot粒速度下限">
+          <input id="botEjectSpeedSlider" type="range" min="300" max="1400" step="10" value="710" aria-label="Botが吐く粒の速度">
+          <strong id="botEjectSpeedValue">710</strong>
+          <input id="botEjectSpeedMaxBox" class="max-input" type="number" min="300" step="10" value="1400" aria-label="Bot粒速度上限">
         </label>
         <label class="setting-control">
           <span>行動</span>
@@ -241,10 +255,10 @@
     </div>
   </section>
 
-  <script src="./data/version.js?v=v2026.05.11.13"></script>
-  <script src="./data/palettes.js?v=v2026.05.11.13"></script>
-  <script src="./data/keybindings.js?v=v2026.05.11.13"></script>
-  <script src="./data.js?v=v2026.05.11.13"></script>
-  <script src="./script.js?v=v2026.05.11.13"></script>
+  <script src="./data/version.js?v=v2026.05.11.14"></script>
+  <script src="./data/palettes.js?v=v2026.05.11.14"></script>
+  <script src="./data/keybindings.js?v=v2026.05.11.14"></script>
+  <script src="./data.js?v=v2026.05.11.14"></script>
+  <script src="./script.js?v=v2026.05.11.14"></script>
 </body>
 </html>

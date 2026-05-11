@@ -153,7 +153,8 @@
         refreshCell(cell);
         const startX = cell.x + n.x * (cell.radius + 18);
         const startY = cell.y + n.y * (cell.radius + 18);
-        const feed = createFeed(startX, startY, n.x, n.y, actor.color, actor.id, state.settings.ejectSpeed, ejectMass);
+        const feedSpeed = actor.isHuman ? state.settings.ejectSpeed : state.settings.botEjectSpeed;
+        const feed = createFeed(startX, startY, n.x, n.y, actor.color, actor.id, feedSpeed, ejectMass);
         feed.vx += cell.vx * 0.25 + cell.boostX * 0.08;
         feed.vy += cell.vy * 0.25 + cell.boostY * 0.08;
         return true;
@@ -191,7 +192,7 @@
         const liveCells = bot.cells.filter((cell) => !cell.dead);
         const canEject = liveCells.some((cell) => cell.mass >= MIN_EJECT_SOURCE_MASS);
         if (!canEject) {
-          spawnActor(bot, playerSpawnMass());
+          spawnActor(bot, botSpawnMass());
           return true;
         }
 
