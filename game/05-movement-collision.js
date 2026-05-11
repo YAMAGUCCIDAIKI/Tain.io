@@ -492,19 +492,21 @@
             if (distSq(feed.x, feed.y, virus.x, virus.y) > hit * hit) continue;
 
             feed.dead = true;
-            const owner = actorById(feed.ownerId);
-            if (owner) {
-              virus.feedCount += 1;
-              const n = normalized(feed.vx, feed.vy, feed.x - virus.x, feed.y - virus.y);
-              if (virus.feedCount >= VIRUS_FEED_LIMIT) {
-                virus.feedCount = 0;
-                const spawnX = clamp(virus.x + n.x * (virus.radius * 2.1), virus.radius, WORLD_SIZE - virus.radius);
-                const spawnY = clamp(virus.y + n.y * (virus.radius * 2.1), virus.radius, WORLD_SIZE - virus.radius);
-                const newVirus = createVirus(spawnX, spawnY, false);
-                newVirus.vx = n.x * 540;
-                newVirus.vy = n.y * 540;
-                state.viruses.push(newVirus);
-              }
+            // 粒を吸った棘は質量と見た目の半径を同時に更新する。
+            virus.mass += feed.mass;
+            virus.radius = radiusFromMass(virus.mass);
+            virus.feedCount += 1;
+            const n = normalized(feed.vx, feed.vy, feed.x - virus.x, feed.y - virus.y);
+            if (virus.feedCount >= VIRUS_FEED_LIMIT) {
+              virus.feedCount = 0;
+              const spawnX = clamp(virus.x + n.x * (virus.radius * 2.1), virus.radius, WORLD_SIZE - virus.radius);
+              const spawnY = clamp(virus.y + n.y * (virus.radius * 2.1), virus.radius, WORLD_SIZE - virus.radius);
+              const newVirus = createVirus(spawnX, spawnY, false);
+              newVirus.vx = n.x * 540;
+              newVirus.vy = n.y * 540;
+              state.viruses.push(newVirus);
+              virus.mass = VIRUS_MASS;
+              virus.radius = radiusFromMass(virus.mass);
             }
             break;
           }
