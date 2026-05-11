@@ -377,6 +377,17 @@
         return best;
       }
 
+      function findRandomSafeSpawnPosition(radius, padding = 80, attempts = 24, options = {}) {
+        let fallback = randomPosition(padding);
+        for (let attempt = 0; attempt < attempts; attempt += 1) {
+          const pos = randomPosition(padding);
+          const score = spawnClearanceScore(pos.x, pos.y, radius, options);
+          if (score >= 0) return pos;
+          if (score > spawnClearanceScore(fallback.x, fallback.y, radius, options)) fallback = pos;
+        }
+        return fallback;
+      }
+
       function spawnActor(actor, mass = 70, preferredX = null, preferredY = null) {
         const pos = preferredX == null ? findSpawnPosition(mass) : { x: preferredX, y: preferredY };
         actor.color = randomActorColor(actor.color);
@@ -409,7 +420,7 @@
 
       function findBotSpawnPosition(mass) {
         const radius = radiusFromMass(mass);
-        return findOpenSpawnPosition(radius, Math.max(8, radius * 0.67), 80, {
+        return findRandomSafeSpawnPosition(radius, Math.max(1, radius * 0.34), 120, {
           avoidViruses: true,
           virusPadding: 90,
           cellPadding: 140,

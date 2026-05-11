@@ -317,7 +317,7 @@
         ctx.fill();
         if (renderMode < 2 || localControlled || r * state.camera.zoom > 28) {
           ctx.lineWidth = Math.max(3 / state.camera.zoom, isActiveLocalActor(actor) ? r * 0.075 : r * 0.045);
-          ctx.strokeStyle = darkenHex(color, isActiveLocalActor(actor) ? 0.18 : 0.24);
+          ctx.strokeStyle = darkenHex(color, isActiveLocalActor(actor) ? 0.08 : 0.12);
           ctx.stroke();
         }
 
@@ -673,7 +673,7 @@
         const localControlled = actor.control === "local";
         const needsStroke = renderMode < 2 || localControlled || r * state.camera.zoom > 28;
         if (needsStroke) {
-          const stroke = darkenHex(color, isActiveLocalActor(actor) ? 0.18 : 0.24);
+          const stroke = darkenHex(color, isActiveLocalActor(actor) ? 0.08 : 0.12);
           graphics.lineStyle(Math.max(3 / state.camera.zoom, isActiveLocalActor(actor) ? r * 0.075 : r * 0.045), colorToPixi(stroke, 0x111827), 1);
         } else {
           graphics.lineStyle(0, 0, 0);

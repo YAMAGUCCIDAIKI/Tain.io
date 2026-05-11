@@ -46,8 +46,8 @@
         let color = previous;
         for (let i = 0; i < 10 && color === previous; i += 1) {
           const hue = Math.floor(Math.random() * 360);
-          const saturation = rand(58, 88);
-          const lightness = rand(42, 58);
+          const saturation = rand(72, 96);
+          const lightness = rand(56, 70);
           color = hslToHex(hue, saturation, lightness);
         }
         return color || "#2e90fa";
