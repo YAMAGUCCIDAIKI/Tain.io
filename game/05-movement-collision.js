@@ -441,16 +441,14 @@
           feed.vy *= decay;
           if (feed.x < feed.radius || feed.x > WORLD_SIZE - feed.radius) {
             feed.x = clamp(feed.x, feed.radius, WORLD_SIZE - feed.radius);
-            feed.vy = 0;
             if ((feed.x <= feed.radius && feed.vx < 0) || (feed.x >= WORLD_SIZE - feed.radius && feed.vx > 0)) {
-              feed.vx *= 0.22;
+              feed.vx = 0;
             }
           }
           if (feed.y < feed.radius || feed.y > WORLD_SIZE - feed.radius) {
             feed.y = clamp(feed.y, feed.radius, WORLD_SIZE - feed.radius);
-            feed.vx = 0;
             if ((feed.y <= feed.radius && feed.vy < 0) || (feed.y >= WORLD_SIZE - feed.radius && feed.vy > 0)) {
-              feed.vy *= 0.22;
+              feed.vy = 0;
             }
           }
         }
