@@ -1,2 +1,2 @@
 // 画面に表示するゲームのバージョン番号を定義します。
-window.TAIN_DATA_VERSION = "v2026.05.11.15";
+window.TAIN_DATA_VERSION = "v2026.05.11.16";
