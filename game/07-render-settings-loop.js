@@ -1,4 +1,95 @@
 // 描画、設定スライダー、入力イベント、メインループを扱います。
+      const pixiState = {
+        renderer: null,
+        stage: null,
+        world: null,
+        grid: null,
+        foods: null,
+        feeds: null,
+        entities: null,
+        border: null,
+        labels: null,
+        labelPool: [],
+        usedLabels: 0,
+        bitmapFontsReady: false,
+        disabled: false
+      };
+
+      function colorToPixi(color, fallback = 0xffffff) {
+        if (typeof color !== "string") return fallback;
+        if (color[0] === "#") {
+          const value = Number.parseInt(color.slice(1), 16);
+          return Number.isFinite(value) ? value : fallback;
+        }
+        return fallback;
+      }
+
+      function ensurePixiRenderer() {
+        if (pixiState.disabled || !window.PIXI) return false;
+        if (pixiState.renderer) return true;
+        try {
+          pixiState.renderer = new PIXI.Renderer({
+            width: state.width,
+            height: state.height,
+            resolution: state.dpr,
+            autoDensity: true,
+            antialias: false,
+            backgroundColor: 0xf7f9fc,
+            backgroundAlpha: 1
+          });
+          pixiState.renderer.view.className = "pixi-canvas";
+          document.body.insertBefore(pixiState.renderer.view, canvas);
+          pixiState.stage = new PIXI.Container();
+          pixiState.world = new PIXI.Container();
+          pixiState.grid = new PIXI.Graphics();
+          pixiState.foods = new PIXI.Graphics();
+          pixiState.feeds = new PIXI.Graphics();
+          pixiState.entities = new PIXI.Graphics();
+          pixiState.border = new PIXI.Graphics();
+          pixiState.labels = new PIXI.Container();
+          pixiState.stage.addChild(pixiState.world);
+          pixiState.world.addChild(pixiState.grid, pixiState.foods, pixiState.feeds, pixiState.entities, pixiState.border);
+          pixiState.world.addChild(pixiState.labels);
+          return true;
+        } catch (error) {
+          console.warn("PIXI renderer disabled", error);
+          pixiState.disabled = true;
+          return false;
+        }
+      }
+
+      function resizePixiRenderer() {
+        if (!pixiState.renderer) return;
+        pixiState.renderer.resolution = state.dpr;
+        pixiState.renderer.resize(state.width, state.height);
+      }
+
+      function ensurePixiBitmapFonts() {
+        if (pixiState.bitmapFontsReady || !window.PIXI?.BitmapFont) return;
+        try {
+          PIXI.BitmapFont.from("TainNameFont", {
+            fontFamily: "Inter, Arial, sans-serif",
+            fontSize: 42,
+            fontWeight: "700",
+            fill: "#ffffff",
+            stroke: "#081220",
+            strokeThickness: 6
+          }, { chars: PIXI.BitmapFont.ASCII });
+          PIXI.BitmapFont.from("TainMassFont", {
+            fontFamily: "Inter, Arial, sans-serif",
+            fontSize: 25,
+            fontWeight: "700",
+            fill: "#ffffff",
+            stroke: "#081220",
+            strokeThickness: 4
+          }, { chars: PIXI.BitmapFont.ASCII });
+          pixiState.bitmapFontsReady = true;
+        } catch (error) {
+          console.warn("PIXI bitmap font disabled", error);
+          pixiState.bitmapFontsReady = false;
+        }
+      }
+
       function visibleWorldBounds(pad = 120) {
         const halfW = state.width * 0.5 / state.camera.zoom;
         const halfH = state.height * 0.5 / state.camera.zoom;
@@ -254,6 +345,101 @@
         }
       }
 
+      function drawCellLabel(cell, renderMode = 0) {
+        const actor = cell.actor;
+        const localControlled = actor.control === "local";
+        let progress = 1;
+        if (cell.birthDuration > 0 && cell.birthAge < cell.birthDuration) {
+          progress = clamp(cell.birthAge / cell.birthDuration, 0, 1);
+          progress = 1 - Math.pow(1 - progress, 3);
+        }
+        const scale = cell.birthScale + (1 - cell.birthScale) * progress;
+        const cellX = entityRenderX(cell);
+        const cellY = entityRenderY(cell);
+        const drawX = cell.birthX + (cellX - cell.birthX) * progress;
+        const drawY = cell.birthY + (cellY - cell.birthY) * progress;
+        const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
+        const r = Math.max(1, visualRadius * scale);
+        if (!(scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const nameSize = clamp(r * 0.34, 13, 42);
+        ctx.font = `700 ${nameSize}px Inter, ui-sans-serif, system-ui, sans-serif`;
+        ctx.lineWidth = Math.max(2, nameSize * 0.16);
+        ctx.strokeStyle = "rgba(8, 18, 32, 0.42)";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
+        const label = displayActorName(actor);
+        ctx.strokeText(label, drawX, drawY - nameSize * 0.12);
+        ctx.fillText(label, drawX, drawY - nameSize * 0.12);
+
+        const showMass = isLocalViewActor(actor) ? state.settings.showOwnMass : state.settings.showOtherMass;
+        if (r * state.camera.zoom > 32 && showMass) {
+          const massSize = clamp(r * 0.2, 10, 25);
+          ctx.font = `700 ${massSize}px Inter, ui-sans-serif, system-ui, sans-serif`;
+          ctx.lineWidth = Math.max(2, massSize * 0.14);
+          ctx.strokeText(String(Math.round(cell.mass)), drawX, drawY + nameSize * 0.62);
+          ctx.fillText(String(Math.round(cell.mass)), drawX, drawY + nameSize * 0.62);
+        }
+      }
+
+      function acquirePixiLabel() {
+        let label = pixiState.labelPool[pixiState.usedLabels];
+        if (!label) {
+          label = new PIXI.BitmapText("", { fontName: "TainNameFont", fontSize: 24, tint: 0xffffff });
+          label.anchor.set(0.5);
+          label.visible = false;
+          pixiState.labelPool.push(label);
+          pixiState.labels.addChild(label);
+        }
+        pixiState.usedLabels += 1;
+        label.visible = true;
+        return label;
+      }
+
+      function hideUnusedPixiLabels() {
+        for (let i = pixiState.usedLabels; i < pixiState.labelPool.length; i += 1) {
+          pixiState.labelPool[i].visible = false;
+        }
+      }
+
+      function drawPixiText(text, x, y, fontName, fontSize) {
+        if (!/^[\x20-\x7e]*$/.test(String(text))) return false;
+        const label = acquirePixiLabel();
+        label.text = String(text);
+        label.fontName = fontName;
+        label.fontSize = fontSize;
+        label.position.set(x, y);
+        label.tint = 0xffffff;
+        return true;
+      }
+
+      function drawPixiCellLabel(cell, renderMode = 0) {
+        const actor = cell.actor;
+        const localControlled = actor.control === "local";
+        let progress = 1;
+        if (cell.birthDuration > 0 && cell.birthAge < cell.birthDuration) {
+          progress = clamp(cell.birthAge / cell.birthDuration, 0, 1);
+          progress = 1 - Math.pow(1 - progress, 3);
+        }
+        const scale = cell.birthScale + (1 - cell.birthScale) * progress;
+        const cellX = entityRenderX(cell);
+        const cellY = entityRenderY(cell);
+        const drawX = cell.birthX + (cellX - cell.birthX) * progress;
+        const drawY = cell.birthY + (cellY - cell.birthY) * progress;
+        const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
+        const r = Math.max(1, visualRadius * scale);
+        if (!(scale > 0.72 && r * state.camera.zoom > 14 && (renderMode === 0 || localControlled))) return true;
+        const nameSize = clamp(r * 0.34, 13, 42);
+        if (!drawPixiText(displayActorName(actor), drawX, drawY - nameSize * 0.12, "TainNameFont", nameSize)) return false;
+
+        const showMass = isLocalViewActor(actor) ? state.settings.showOwnMass : state.settings.showOtherMass;
+        if (r * state.camera.zoom > 32 && showMass) {
+          const massSize = clamp(r * 0.2, 10, 25);
+          drawPixiText(Math.round(cell.mass), drawX, drawY + nameSize * 0.62, "TainMassFont", massSize);
+        }
+        return true;
+      }
+
       function appendCellCirclePath(cell) {
         let progress = 1;
         if (cell.birthDuration > 0 && cell.birthAge < cell.birthDuration) {
@@ -380,7 +566,188 @@
         }
       }
 
+      function drawPixiGrid(bounds, renderMode) {
+        const g = pixiState.grid;
+        g.clear();
+        g.lineStyle(1 / state.camera.zoom, 0xe6ebf2, 1);
+        if (renderMode < 2) {
+          const startSmallX = Math.floor(bounds.left / GRID_SMALL) * GRID_SMALL;
+          const endSmallX = Math.ceil(bounds.right / GRID_SMALL) * GRID_SMALL;
+          const startSmallY = Math.floor(bounds.top / GRID_SMALL) * GRID_SMALL;
+          const endSmallY = Math.ceil(bounds.bottom / GRID_SMALL) * GRID_SMALL;
+          for (let x = startSmallX; x <= endSmallX; x += GRID_SMALL) {
+            g.moveTo(x, bounds.top);
+            g.lineTo(x, bounds.bottom);
+          }
+          for (let y = startSmallY; y <= endSmallY; y += GRID_SMALL) {
+            g.moveTo(bounds.left, y);
+            g.lineTo(bounds.right, y);
+          }
+        }
+        g.lineStyle(1.4 / state.camera.zoom, 0xcfd8e3, 1);
+        const largeStep = renderMode >= 2 ? GRID_LARGE * 2 : GRID_LARGE;
+        const startLargeX = Math.floor(bounds.left / largeStep) * largeStep;
+        const endLargeX = Math.ceil(bounds.right / largeStep) * largeStep;
+        const startLargeY = Math.floor(bounds.top / largeStep) * largeStep;
+        const endLargeY = Math.ceil(bounds.bottom / largeStep) * largeStep;
+        for (let x = startLargeX; x <= endLargeX; x += largeStep) {
+          g.moveTo(x, bounds.top);
+          g.lineTo(x, bounds.bottom);
+        }
+        for (let y = startLargeY; y <= endLargeY; y += largeStep) {
+          g.moveTo(bounds.left, y);
+          g.lineTo(bounds.right, y);
+        }
+      }
+
+      function drawPixiPolygon(graphics, entity, sides, radius, color, strokeColor = null) {
+        const x = entityRenderX(entity);
+        const y = entityRenderY(entity);
+        const phase = ((entity.id || 0) % sides) * TAU / sides;
+        if (strokeColor != null) graphics.lineStyle(2 / state.camera.zoom, strokeColor, 1);
+        else graphics.lineStyle(0, 0, 0);
+        graphics.beginFill(color);
+        for (let i = 0; i < sides; i += 1) {
+          const angle = phase + i * TAU / sides;
+          const px = x + Math.cos(angle) * radius;
+          const py = y + Math.sin(angle) * radius;
+          if (i === 0) graphics.moveTo(px, py);
+          else graphics.lineTo(px, py);
+        }
+        graphics.closePath();
+        graphics.endFill();
+      }
+
+      function drawPixiVirus(graphics, virus) {
+        const points = virusSpikePoints(56);
+        const centerX = entityRenderX(virus);
+        const centerY = entityRenderY(virus);
+        graphics.lineStyle(2 / state.camera.zoom, 0x00c60a, 1);
+        graphics.beginFill(0x00f40b);
+        for (let i = 0; i < points.length; i += 1) {
+          const point = points[i];
+          const x = centerX + point.x * virus.radius;
+          const y = centerY + point.y * virus.radius;
+          if (i === 0) graphics.moveTo(x, y);
+          else graphics.lineTo(x, y);
+        }
+        graphics.closePath();
+        graphics.endFill();
+      }
+
+      function drawPixiCell(graphics, cell, renderMode) {
+        const actor = cell.actor;
+        let progress = 1;
+        if (cell.birthDuration > 0 && cell.birthAge < cell.birthDuration) {
+          progress = clamp(cell.birthAge / cell.birthDuration, 0, 1);
+          progress = 1 - Math.pow(1 - progress, 3);
+        }
+        const scale = cell.birthScale + (1 - cell.birthScale) * progress;
+        const cellX = entityRenderX(cell);
+        const cellY = entityRenderY(cell);
+        const drawX = cell.birthX + (cellX - cell.birthX) * progress;
+        const drawY = cell.birthY + (cellY - cell.birthY) * progress;
+        const visualRadius = Number.isFinite(cell.renderRadius) ? cell.renderRadius : cell.radius;
+        const r = Math.max(1, visualRadius * scale);
+        const color = actorRenderColor(actor);
+        const localControlled = actor.control === "local";
+        const needsStroke = renderMode < 2 || localControlled || r * state.camera.zoom > 28;
+        if (needsStroke) {
+          const stroke = isActiveLocalActor(actor) ? ACTIVE_CONTROL_STROKE : (isLocalActor(actor) ? "#07529e" : darkenHex(color, 0.24));
+          graphics.lineStyle(Math.max(3 / state.camera.zoom, isActiveLocalActor(actor) ? r * 0.075 : r * 0.045), colorToPixi(stroke, 0x111827), 1);
+        } else {
+          graphics.lineStyle(0, 0, 0);
+        }
+        graphics.beginFill(colorToPixi(color, 0xffffff));
+        graphics.drawCircle(drawX, drawY, r);
+        graphics.endFill();
+      }
+
+      function drawPixiSizedWorldEntities(renderMode) {
+        const graphics = pixiState.entities;
+        graphics.clear();
+        renderSizedEntitiesScratch.sort((a, b) => a.radius - b.radius);
+        for (const item of renderSizedEntitiesScratch) {
+          if (item.type === "virus") drawPixiVirus(graphics, item.entity);
+          else drawPixiCell(graphics, item.entity, renderMode);
+        }
+      }
+
+      function drawPixiWorld() {
+        if (!ensurePixiRenderer()) return false;
+        ensurePixiBitmapFonts();
+        const viewBounds = visibleWorldBounds();
+        const bounds = renderWorldBounds(viewBounds);
+        detailCellsScratch.length = 0;
+        foodRenderScratch.length = 0;
+        feedRenderScratch.length = 0;
+        renderSizedEntitiesScratch.length = 0;
+        const boostedVisibleCells = queryRenderableCells(bounds);
+        const renderMode = renderModeForVisibleCells(renderCellsScratch.length, boostedVisibleCells);
+        state.lastRenderMode = renderMode;
+
+        const world = pixiState.world;
+        pixiState.usedLabels = 0;
+        world.position.set(state.width * 0.5, state.height * 0.5);
+        world.scale.set(state.camera.zoom);
+        world.pivot.set(state.camera.x, state.camera.y);
+
+        drawPixiGrid(viewBounds, renderMode);
+        pixiState.border.clear();
+        if (renderMode < 2) {
+          pixiState.border.lineStyle(3 / state.camera.zoom, 0x808b9a, 0.55);
+          pixiState.border.drawRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+        }
+
+        const foodGraphics = pixiState.foods;
+        foodGraphics.clear();
+        const visibleFoods = foodGrid.queryRect(bounds.left - 20, bounds.top - 20, bounds.right + 20, bounds.bottom + 20, aiEntityScratch);
+        for (const food of visibleFoods) {
+          if (food.dead || !isVisible(food, bounds, 20)) continue;
+          drawPixiPolygon(foodGraphics, food, 9, 8.5, colorToPixi(food.color, 0x7bd67b));
+        }
+
+        const feedGraphics = pixiState.feeds;
+        feedGraphics.clear();
+        for (const feed of queryRenderableFeeds(bounds)) {
+          if (!isVisible(feed, bounds, 20)) continue;
+          drawPixiPolygon(feedGraphics, feed, 10, Math.max(7.5, feed.radius * 0.72), colorToPixi(feed.color, 0xffffff), colorToPixi(darkenHex(feed.color, 0.24), 0x999999));
+        }
+
+        for (const virus of queryRenderableViruses(bounds)) {
+          if (virus.dead || !isVisible(virus, bounds, 90)) continue;
+          renderSizedEntitiesScratch.push({ type: "virus", radius: virus.radius, entity: virus });
+        }
+        for (const cell of renderCellsScratch) {
+          renderSizedEntitiesScratch.push({ type: "cell", radius: cell.radius, entity: cell });
+        }
+        drawPixiSizedWorldEntities(renderMode);
+        if (pixiState.bitmapFontsReady) {
+          for (const cell of renderCellsScratch) {
+            if (!drawPixiCellLabel(cell, renderMode)) detailCellsScratch.push(cell);
+          }
+        }
+        hideUnusedPixiLabels();
+        pixiState.renderer.render(pixiState.stage);
+
+        ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+        ctx.clearRect(0, 0, state.width, state.height);
+        ctx.save();
+        ctx.translate(state.width * 0.5, state.height * 0.5);
+        ctx.scale(state.camera.zoom, state.camera.zoom);
+        ctx.translate(-state.camera.x, -state.camera.y);
+        if (!pixiState.bitmapFontsReady) {
+          for (const cell of renderCellsScratch) drawCellLabel(cell, renderMode);
+        } else {
+          for (const cell of detailCellsScratch) drawCellLabel(cell, renderMode);
+        }
+        drawCursorLine();
+        ctx.restore();
+        return true;
+      }
+
       function draw() {
+        if (drawPixiWorld()) return;
         ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
         ctx.fillStyle = "#f7f9fc";
         ctx.fillRect(0, 0, state.width, state.height);
@@ -439,6 +806,7 @@
         canvas.height = Math.floor(state.height * state.dpr);
         canvas.style.width = `${state.width}px`;
         canvas.style.height = `${state.height}px`;
+        resizePixiRenderer();
         state.input.mouseX = state.width * 0.5;
         state.input.mouseY = state.height * 0.5;
       }

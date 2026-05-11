@@ -3,7 +3,7 @@
       "use strict";
 
       const canvas = document.getElementById("game");
-      const ctx = canvas.getContext("2d", { alpha: false });
+      const ctx = canvas.getContext("2d", { alpha: true });
       const massEl = document.getElementById("mass");
       const cellsEl = document.getElementById("cells");
       const fpsEl = document.getElementById("fps");
@@ -119,7 +119,7 @@
 
       const externalData = window.TAIN_DATA || {};
       const TAU = Math.PI * 2;
-      const APP_VERSION = externalData.APP_VERSION || "v2026.05.11.20";
+      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.1";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;

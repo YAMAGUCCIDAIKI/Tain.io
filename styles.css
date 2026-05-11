@@ -31,9 +31,24 @@
       cursor: crosshair;
     }
 
+    #game {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .pixi-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     .hud {
       position: fixed;
       inset: auto auto 14px 14px;
+      z-index: 5;
       min-width: 0;
       padding: 0;
       border: 0;
@@ -92,6 +107,7 @@
     .board {
       position: fixed;
       inset: 16px 18px auto auto;
+      z-index: 5;
       width: min(270px, calc(100vw - 150px));
       padding: 0 0 10px;
       border: 3px solid rgba(125, 128, 132, 0.28);
@@ -150,6 +166,7 @@
     .flash {
       display: none;
       position: fixed;
+      z-index: 6;
       left: 50%;
       bottom: 28px;
       transform: translateX(-50%);
@@ -207,6 +224,7 @@
     .menu-screen {
       position: fixed;
       inset: 0;
+      z-index: 4;
       display: none;
       overflow-y: auto;
       place-items: center;
