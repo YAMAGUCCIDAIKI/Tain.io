@@ -8,9 +8,10 @@
         feeds: null,
         entities: null,
         border: null,
-        labels: null,
         labelPool: [],
         usedLabels: 0,
+        graphicsPool: [],
+        usedGraphics: 0,
         bitmapFontsReady: false,
         disabled: false
       };
@@ -44,12 +45,10 @@
           pixiState.grid = new PIXI.Graphics();
           pixiState.foods = new PIXI.Graphics();
           pixiState.feeds = new PIXI.Graphics();
-          pixiState.entities = new PIXI.Graphics();
+          pixiState.entities = new PIXI.Container();
           pixiState.border = new PIXI.Graphics();
-          pixiState.labels = new PIXI.Container();
           pixiState.stage.addChild(pixiState.world);
           pixiState.world.addChild(pixiState.grid, pixiState.foods, pixiState.feeds, pixiState.entities, pixiState.border);
-          pixiState.world.addChild(pixiState.labels);
           return true;
         } catch (error) {
           console.warn("PIXI renderer disabled", error);
@@ -389,10 +388,10 @@
           label.anchor.set(0.5);
           label.visible = false;
           pixiState.labelPool.push(label);
-          pixiState.labels.addChild(label);
         }
         pixiState.usedLabels += 1;
         label.visible = true;
+        pixiState.entities.addChild(label);
         return label;
       }
 
@@ -438,6 +437,27 @@
           drawPixiText(Math.round(cell.mass), drawX, drawY + nameSize * 0.62, "TainMassFont", massSize);
         }
         return true;
+      }
+
+      function acquirePixiEntityGraphics() {
+        let graphics = pixiState.graphicsPool[pixiState.usedGraphics];
+        if (!graphics) {
+          graphics = new PIXI.Graphics();
+          graphics.visible = false;
+          pixiState.graphicsPool.push(graphics);
+        }
+        pixiState.usedGraphics += 1;
+        graphics.visible = true;
+        graphics.clear();
+        pixiState.entities.addChild(graphics);
+        return graphics;
+      }
+
+      function hideUnusedPixiEntityGraphics() {
+        for (let i = pixiState.usedGraphics; i < pixiState.graphicsPool.length; i += 1) {
+          pixiState.graphicsPool[i].visible = false;
+          pixiState.graphicsPool[i].clear();
+        }
       }
 
       function appendCellCirclePath(cell) {
@@ -664,13 +684,21 @@
       }
 
       function drawPixiSizedWorldEntities(renderMode) {
-        const graphics = pixiState.entities;
-        graphics.clear();
+        pixiState.usedGraphics = 0;
+        let graphics = acquirePixiEntityGraphics();
         renderSizedEntitiesScratch.sort((a, b) => a.radius - b.radius);
         for (const item of renderSizedEntitiesScratch) {
-          if (item.type === "virus") drawPixiVirus(graphics, item.entity);
-          else drawPixiCell(graphics, item.entity, renderMode);
+          if (item.type === "virus") {
+            drawPixiVirus(graphics, item.entity);
+            continue;
+          }
+          drawPixiCell(graphics, item.entity, renderMode);
+          if (pixiState.bitmapFontsReady && !drawPixiCellLabel(item.entity, renderMode)) {
+            detailCellsScratch.push(item.entity);
+          }
+          graphics = acquirePixiEntityGraphics();
         }
+        hideUnusedPixiEntityGraphics();
       }
 
       function drawPixiWorld() {
@@ -688,6 +716,7 @@
 
         const world = pixiState.world;
         pixiState.usedLabels = 0;
+        detailCellsScratch.length = 0;
         world.position.set(state.width * 0.5, state.height * 0.5);
         world.scale.set(state.camera.zoom);
         world.pivot.set(state.camera.x, state.camera.y);
@@ -711,7 +740,7 @@
         feedGraphics.clear();
         for (const feed of queryRenderableFeeds(bounds)) {
           if (!isVisible(feed, bounds, 20)) continue;
-          drawPixiPolygon(feedGraphics, feed, 10, Math.max(7.5, feed.radius * 0.72), colorToPixi(feed.color, 0xffffff), colorToPixi(darkenHex(feed.color, 0.24), 0x999999));
+          drawPixiPolygon(feedGraphics, feed, 10, Math.max(7.5, feed.radius * 0.72), colorToPixi(feed.color, 0xffffff));
         }
 
         for (const virus of queryRenderableViruses(bounds)) {
@@ -722,11 +751,6 @@
           renderSizedEntitiesScratch.push({ type: "cell", radius: cell.radius, entity: cell });
         }
         drawPixiSizedWorldEntities(renderMode);
-        if (pixiState.bitmapFontsReady) {
-          for (const cell of renderCellsScratch) {
-            if (!drawPixiCellLabel(cell, renderMode)) detailCellsScratch.push(cell);
-          }
-        }
         hideUnusedPixiLabels();
         pixiState.renderer.render(pixiState.stage);
 
