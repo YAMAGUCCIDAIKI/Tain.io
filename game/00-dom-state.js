@@ -111,7 +111,7 @@
 
       const externalData = window.TAIN_DATA || {};
       const TAU = Math.PI * 2;
-      const APP_VERSION = externalData.APP_VERSION || "v2026.05.11.06";
+      const APP_VERSION = externalData.APP_VERSION || "v2026.05.11.09";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -134,7 +134,7 @@
       const DEFAULT_SPLIT_RECOIL = 0;
       const DEFAULT_SPLIT_SPEED = 110;
       const DEFAULT_SPLIT_DECAY_TIME = 0.7;
-      const DEFAULT_SPLIT_INPUT_SPEED = 4;
+      const DEFAULT_SPLIT_INPUT_SPEED = 0;
       const DEFAULT_GAME_SPEED = 1;
       const DEFAULT_RENDER_RANGE = 65;
       const DEFAULT_MERGE_COOLDOWN = 30;
@@ -277,7 +277,7 @@
             splitRecoil: 0,
             splitSpeed: 10,
             splitDecayTime: 0.1,
-            splitInputSpeed: 1,
+            splitInputSpeed: 0,
             gameSpeed: 0.1,
             renderRange: 35,
             mergeCooldown: 0,
@@ -295,7 +295,7 @@
             splitRecoil: 40,
             splitSpeed: 300,
             splitDecayTime: 2,
-            splitInputSpeed: 4,
+            splitInputSpeed: 500,
             gameSpeed: 3,
             renderRange: 120,
             mergeCooldown: 60,

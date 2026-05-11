@@ -548,11 +548,13 @@
         }
         if (prefs.min && typeof prefs.min === "object") {
           for (const kind of Object.keys(state.settings.min)) {
+            if (kind === "splitInputSpeed" && prefs.min[kind] <= 4) continue;
             if (Number.isFinite(prefs.min[kind])) setSliderBound(kind, "min", prefs.min[kind], false);
           }
         }
         if (prefs.max && typeof prefs.max === "object") {
           for (const kind of Object.keys(state.settings.max)) {
+            if (kind === "splitInputSpeed" && prefs.max[kind] <= 4) continue;
             if (Number.isFinite(prefs.max[kind])) setSliderBound(kind, "max", prefs.max[kind], false);
           }
         }

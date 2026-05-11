@@ -815,7 +815,10 @@
 
             let remaining = Math.max(1, actor.input.splitCount || 1);
             let didAnySplit = false;
-            let splitBudget = clamp(Math.round(state.settings.splitInputSpeed) || MAX_QUEUED_SPLITS_PER_FRAME, 1, MAX_QUEUED_SPLITS_PER_FRAME);
+            const splitIntervalSeconds = Math.max(0, (Number(state.settings.splitInputSpeed) || 0) / 1000);
+            let splitBudget = splitIntervalSeconds <= 0
+              ? MAX_QUEUED_SPLITS_PER_FRAME
+              : (now + 0.0001 >= actor.nextQueuedSplitAt ? 1 : 0);
             while (remaining > 0 && splitBudget > 0 && liveCellCount(actor) < MAX_CELLS) {
               if (!splitActor(actor, actor.input.splitLockX, actor.input.splitLockY, now, 0, actor.input.targetX, actor.input.targetY)) {
                 remaining = 0;
@@ -823,6 +826,7 @@
                 didAnySplit = true;
                 remaining -= 1;
                 splitBudget -= 1;
+                if (splitIntervalSeconds > 0) actor.nextQueuedSplitAt = now + splitIntervalSeconds;
               }
             }
 

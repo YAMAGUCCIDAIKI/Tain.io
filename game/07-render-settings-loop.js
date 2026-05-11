@@ -294,7 +294,7 @@
           ctx.fill();
         }
 
-        detailCellsScratch.sort((a, b) => a.radius - b.radius);
+        detailCellsScratch.sort(compareCellsForDraw);
         for (const cell of detailCellsScratch) drawCell(cell, renderMode);
       }
 
@@ -373,11 +373,27 @@
         for (const cell of renderCellsScratch) {
           renderSizedEntitiesScratch.push({ type: "cell", radius: cell.radius, entity: cell });
         }
-        renderSizedEntitiesScratch.sort((a, b) => a.radius - b.radius);
+        renderSizedEntitiesScratch.sort(compareSizedEntitiesForDraw);
         for (const item of renderSizedEntitiesScratch) {
           if (item.type === "virus") drawVirus(item.entity, renderMode);
           else drawCell(item.entity, renderMode);
         }
+      }
+
+      function compareCellsForDraw(a, b) {
+        const radiusDiff = a.radius - b.radius;
+        if (Math.abs(radiusDiff) > 0.001) return radiusDiff;
+        const priorityDiff = (a.splitPriority || 0) - (b.splitPriority || 0);
+        if (priorityDiff !== 0) return priorityDiff;
+        return (a.id || 0) - (b.id || 0);
+      }
+
+      function compareSizedEntitiesForDraw(a, b) {
+        const radiusDiff = a.radius - b.radius;
+        if (Math.abs(radiusDiff) > 0.001) return radiusDiff;
+        if (a.type === "cell" && b.type === "cell") return compareCellsForDraw(a.entity, b.entity);
+        if (a.type !== b.type) return a.type === "virus" ? 1 : -1;
+        return ((a.entity && a.entity.id) || 0) - ((b.entity && b.entity.id) || 0);
       }
 
       function draw() {
@@ -489,7 +505,7 @@
         splitRecoil: { slider: splitRecoilSlider, minBox: splitRecoilMinBox, maxBox: splitRecoilMaxBox, valueEl: splitRecoilValueEl, setting: "splitRecoil", absoluteMin: 0 },
         splitSpeed: { slider: splitSpeedSlider, minBox: splitSpeedMinBox, maxBox: splitSpeedMaxBox, valueEl: splitSpeedValueEl, setting: "splitSpeed", absoluteMin: 10 },
         splitDecayTime: { slider: splitDecayTimeSlider, minBox: splitDecayTimeMinBox, maxBox: splitDecayTimeMaxBox, valueEl: splitDecayTimeValueEl, setting: "splitDecayTime", absoluteMin: 0.1, format: (value) => `${Number(value).toFixed(1)}秒` },
-        splitInputSpeed: { slider: splitInputSpeedSlider, minBox: splitInputSpeedMinBox, maxBox: splitInputSpeedMaxBox, valueEl: splitInputSpeedValueEl, setting: "splitInputSpeed", absoluteMin: 1 },
+        splitInputSpeed: { slider: splitInputSpeedSlider, minBox: splitInputSpeedMinBox, maxBox: splitInputSpeedMaxBox, valueEl: splitInputSpeedValueEl, setting: "splitInputSpeed", absoluteMin: 0, format: (value) => `${Math.round(Number(value))}ms` },
         gameSpeed: { slider: gameSpeedSlider, minBox: gameSpeedMinBox, maxBox: gameSpeedMaxBox, valueEl: gameSpeedValueEl, setting: "gameSpeed", absoluteMin: 0.1, format: formatMultiplier },
         renderRange: { slider: renderRangeSlider, minBox: renderRangeMinBox, maxBox: renderRangeMaxBox, valueEl: renderRangeValueEl, setting: "renderRange", absoluteMin: 35, format: (value) => `${value}%` },
         mergeCooldown: { slider: mergeCooldownSlider, minBox: mergeCooldownMinBox, maxBox: mergeCooldownMaxBox, valueEl: mergeCooldownValueEl, setting: "mergeCooldown", absoluteMin: 0 },
@@ -502,6 +518,7 @@
         if (!Number.isFinite(raw)) return sliderControls[kind]?.absoluteMin ?? 0;
         if (kind === "food") return Math.round(raw / 100) * 100;
         if (kind === "ejectSpeed") return Math.round(raw / 10) * 10;
+        if (kind === "splitInputSpeed") return Math.round(raw / 10) * 10;
         if (kind === "splitSpeed" || kind === "renderRange") return Math.round(raw / 5) * 5;
         if (kind === "splitDecayTime" || kind === "mergeCancelCooldown") return Math.round(raw * 10) / 10;
         if (kind === "gameSpeed") return Math.round(raw * 10) / 10;
@@ -514,7 +531,6 @@
         if (!config) return;
         const absoluteMin = config.absoluteMin;
         let next = Math.max(absoluteMin, roundSliderValue(kind, value));
-        if (kind === "splitInputSpeed") next = clamp(next, absoluteMin, MAX_QUEUED_SPLITS_PER_FRAME);
         if (side === "min") {
           state.settings.min[kind] = next;
           if (state.settings.max[kind] < next) state.settings.max[kind] = next;

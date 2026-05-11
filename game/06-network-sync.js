@@ -1177,7 +1177,7 @@
           }
           if (Number.isFinite(message.settings.splitInputSpeed)) {
             const nextMax = Math.max(state.settings.max.splitInputSpeed, message.settings.splitInputSpeed);
-            const nextValue = clamp(message.settings.splitInputSpeed, 1, nextMax);
+            const nextValue = clamp(Math.round(message.settings.splitInputSpeed / 10) * 10, state.settings.min.splitInputSpeed, nextMax);
             settingsChanged = settingsChanged || nextMax !== state.settings.max.splitInputSpeed || nextValue !== state.settings.splitInputSpeed;
             state.settings.max.splitInputSpeed = nextMax;
             state.settings.splitInputSpeed = nextValue;
