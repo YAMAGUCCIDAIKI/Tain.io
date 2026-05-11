@@ -137,41 +137,30 @@
         return masses;
       }
 
-      function virusBurstMasses(total, count) {
+      function virusBurstPieceCount(total, slots, liveCells) {
+        if (slots <= 1) return 1;
+        if (liveCells === MAX_CELLS - 1) return 2;
+        let pieces = 2;
+        let splitSide = total * 0.6;
+        while (pieces < slots && splitSide * 0.5 >= MIN_CELL_MASS) {
+          splitSide *= 0.5;
+          pieces += 1;
+        }
+        return pieces;
+      }
+
+      function virusBurstMasses(total, count, forceHalf = false) {
         if (count <= 1) return [total];
-        const weights = [];
-        const chainBurst = count > 5;
-        if (chainBurst) {
-          weights.push(rand(7.8, 9.4), rand(2.1, 3.0));
-          for (let i = 2; i < count; i += 1) weights.push(rand(0.18, 0.32));
-        } else {
-          const mediumCount = Math.min(2, Math.max(1, count - 2));
-          for (let i = 0; i < count; i += 1) {
-            if (i === 0) weights.push(rand(9.2, 10.8));
-            else if (i === 1) weights.push(rand(4.2, 5.4));
-            else if (i <= mediumCount) weights.push(rand(1.0, 1.45));
-            else weights.push(rand(0.2, 0.38));
-          }
+        if (forceHalf) return [total * 0.5, total * 0.5];
+
+        const masses = [total * 0.4];
+        let splitSide = total * 0.6;
+        while (masses.length < count - 1) {
+          splitSide *= 0.5;
+          masses.push(splitSide);
         }
-
-        const weightTotal = weights.reduce((sum, weight) => sum + weight, 0);
-        const masses = weights.map((weight) => Math.max(MIN_CELL_MASS, total * weight / weightTotal));
-        let massTotal = masses.reduce((sum, mass) => sum + mass, 0);
-        for (let guard = 0; guard < 3 && Math.abs(massTotal - total) > 0.001; guard += 1) {
-          const adjustable = masses
-            .map((mass, index) => ({ mass, index }))
-            .filter((entry) => entry.mass > MIN_CELL_MASS + 0.001);
-          if (!adjustable.length) break;
-          const share = (total - massTotal) / adjustable.length;
-          for (const entry of adjustable) {
-            masses[entry.index] = Math.max(MIN_CELL_MASS, masses[entry.index] + share);
-          }
-          massTotal = masses.reduce((sum, mass) => sum + mass, 0);
-        }
-
-        masses[0] = Math.max(MIN_CELL_MASS, masses[0] + total - massTotal);
-
-        return masses.sort((a, b) => b - a);
+        masses.push(splitSide);
+        return masses;
       }
 
       function totalMass(actor) {

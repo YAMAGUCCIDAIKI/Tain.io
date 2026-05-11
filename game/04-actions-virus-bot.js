@@ -201,14 +201,14 @@
         const originalRadius = radiusFromMass(originalMass);
         const chainBurst = cell.fragmentAge > 0 || actor.cells.some((candidate) => candidate !== cell && !candidate.dead && candidate.fragmentAge > 0);
 
-        const desiredPieces = clamp(Math.floor(total / MIN_SPLIT_SOURCE_MASS), 4, 16);
-        const pieces = Math.min(slots, desiredPieces);
+        const forceHalf = liveCells === MAX_CELLS - 1;
+        const pieces = virusBurstPieceCount(total, slots, liveCells);
         if (pieces <= 1) {
           scatterMass(cell, 0.22, cell.x - virus.x, cell.y - virus.y);
           return;
         }
 
-        const pieceMasses = virusBurstMasses(total, pieces);
+        const pieceMasses = virusBurstMasses(total, pieces, forceHalf);
         cell.mass = pieceMasses[0];
         refreshCell(cell);
         setMergeCooldown(cell);
