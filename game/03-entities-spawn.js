@@ -337,11 +337,13 @@
           score = Math.min(score, Math.sqrt(distSq(x, y, options.avoidX, options.avoidY)) - (options.avoidRadius || 0));
         }
 
-        const cellPadding = options.cellPadding || 0;
-        for (const actor of state.actors) {
-          for (const cell of actor.cells) {
-            if (cell.dead) continue;
-            score = Math.min(score, Math.sqrt(distSq(x, y, cell.x, cell.y)) - radius - cell.radius - cellPadding);
+        if (!options.ignoreCells) {
+          const cellPadding = options.cellPadding || 0;
+          for (const actor of state.actors) {
+            for (const cell of actor.cells) {
+              if (cell.dead) continue;
+              score = Math.min(score, Math.sqrt(distSq(x, y, cell.x, cell.y)) - radius - cell.radius - cellPadding);
+            }
           }
         }
 
@@ -364,7 +366,7 @@
         return score;
       }
 
-      function findOpenSpawnPosition(radius, padding = 80, attempts = 24, options = {}) {
+      function findOpenSpawnCandidate(radius, padding = 80, attempts = 24, options = {}) {
         let best = randomPosition(padding);
         let bestScore = -Infinity;
         for (let attempt = 0; attempt < attempts; attempt += 1) {
@@ -375,7 +377,11 @@
             bestScore = score;
           }
         }
-        return best;
+        return { pos: best, score: bestScore };
+      }
+
+      function findOpenSpawnPosition(radius, padding = 80, attempts = 24, options = {}) {
+        return findOpenSpawnCandidate(radius, padding, attempts, options).pos;
       }
 
       function findRandomSafeSpawnPosition(radius, padding = 80, attempts = 24, options = {}) {
@@ -461,12 +467,12 @@
 
       function createVirus(x = null, y = null, natural = true) {
         const radius = radiusFromMass(VIRUS_MASS);
-        const pos = x == null
-          ? findOpenSpawnPosition(radius, 180, 16, {
+        let pos = x == null
+          ? findOpenSpawnCandidate(radius, 180, 16, {
               avoidViruses: true,
               virusPadding: 28,
               cellPadding: 120
-            })
+            }).pos
           : { x, y };
         return {
           id: nextId(),
@@ -485,14 +491,22 @@
 
       function spawnVirusSafely(avoidX = null, avoidY = null) {
         const radius = radiusFromMass(VIRUS_MASS);
-        const pos = findOpenSpawnPosition(radius, 180, 18, {
+        const options = {
           avoidViruses: true,
           avoidX,
           avoidY,
           avoidRadius: avoidX == null ? 0 : 560,
           virusPadding: 32,
           cellPadding: 130
-        });
+        };
+        let candidate = findOpenSpawnCandidate(radius, 180, 18, options);
+        if (candidate.score < 0) {
+          candidate = findOpenSpawnCandidate(radius, 180, 18, {
+            ...options,
+            ignoreCells: true
+          });
+        }
+        const pos = candidate.pos;
         return createVirus(pos.x, pos.y);
       }
 
