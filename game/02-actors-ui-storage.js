@@ -564,6 +564,8 @@
             if (Number.isFinite(prefs.max[kind])) setSliderBound(kind, "max", prefs.max[kind], false);
           }
         }
+        state.settings.max.ejectRate = Math.max(state.settings.max.ejectRate, TARGET_FPS);
+        state.settings.max.botEjectRate = Math.max(state.settings.max.botEjectRate, TARGET_FPS);
         if (prefs.settings && typeof prefs.settings === "object") {
           const saved = prefs.settings;
           if (saved.botEnabled != null) state.settings.botEnabled = Boolean(saved.botEnabled);

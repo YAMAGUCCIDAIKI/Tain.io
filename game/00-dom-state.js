@@ -119,7 +119,7 @@
 
       const externalData = window.TAIN_DATA || {};
       const TAU = Math.PI * 2;
-      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.6";
+      const APP_VERSION = externalData.APP_VERSION || "v2026.05.12.7";
       let WORLD_SIZE = 5000;
       const GRID_SMALL = 50;
       const GRID_LARGE = 250;
@@ -299,13 +299,13 @@
           max: {
             bot: 200,
             botSpawnMass: 5000,
-            botEjectRate: 50,
+            botEjectRate: TARGET_FPS,
             virus: 500,
             food: 100000,
             spawnMass: 5000,
             ejectMass: 80,
             ejectSpeed: 1400,
-            ejectRate: 50,
+            ejectRate: TARGET_FPS,
             splitRecoil: 40,
             splitSpeed: 300,
             splitDecayTime: 2,

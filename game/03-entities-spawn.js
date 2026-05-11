@@ -419,13 +419,7 @@
       }
 
       function findBotSpawnPosition(mass) {
-        const radius = radiusFromMass(mass);
-        return findRandomSafeSpawnPosition(radius, 20, 120, {
-          avoidViruses: true,
-          virusPadding: 90,
-          cellPadding: 140,
-          ignoreWallClearance: true
-        });
+        return randomPosition(20);
       }
 
       function createFood() {

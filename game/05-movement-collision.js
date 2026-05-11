@@ -483,9 +483,10 @@
 
       function handleFeedVirusCollisions() {
         const nearby = [];
+        const virusQueryRange = maxLiveVirusRadius() + DEFAULT_EJECT_MASS;
         for (const feed of state.feeds) {
           if (feed.dead) continue;
-          virusGrid.query(feed.x, feed.y, 90, nearby);
+          virusGrid.query(feed.x, feed.y, virusQueryRange, nearby);
           for (const virus of nearby) {
             if (virus.dead) continue;
             const hit = virus.radius + feed.radius * 0.4;
@@ -533,9 +534,10 @@
         const cells = allCells(scratch)
           .sort((a, b) => virusCollisionPriority(b) - virusCollisionPriority(a));
         const nearby = [];
+        const virusQueryPad = maxLiveVirusRadius() + 120;
         for (const cell of cells) {
           if (cell.dead) continue;
-          queryAlongCellPath(virusGrid, cell, mergeVirusHitRadius(cell) + 360, nearby);
+          queryAlongCellPath(virusGrid, cell, mergeVirusHitRadius(cell) + virusQueryPad, nearby);
           for (const virus of nearby) {
             if (virus.dead) continue;
             const liveCells = liveCellCount(cell.actor);
@@ -559,6 +561,14 @@
             }
           }
         }
+      }
+
+      function maxLiveVirusRadius() {
+        let maxRadius = radiusFromMass(VIRUS_MASS);
+        for (const virus of state.viruses) {
+          if (!virus.dead && virus.radius > maxRadius) maxRadius = virus.radius;
+        }
+        return maxRadius;
       }
 
       function handleCellEating() {
