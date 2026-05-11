@@ -77,6 +77,7 @@
       }
 
       function wallInsetForCell(cell) {
+        if (cell?.actor && !cell.actor.isHuman) return 0;
         return Math.max(1, (cell?.radius || 1) * 0.2649320846);
       }
 
@@ -419,7 +420,7 @@
       }
 
       function findBotSpawnPosition(mass) {
-        return randomPosition(20);
+        return randomPosition(0);
       }
 
       function createFood() {
