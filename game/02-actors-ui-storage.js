@@ -43,12 +43,14 @@
       }
 
       function randomActorColor(previous = "") {
-        if (!playerPalette.length) return "#2e90fa";
         let color = previous;
-        for (let i = 0; i < 6 && color === previous; i += 1) {
-          color = playerPalette[Math.floor(Math.random() * playerPalette.length)];
+        for (let i = 0; i < 10 && color === previous; i += 1) {
+          const hue = Math.floor(Math.random() * 360);
+          const saturation = rand(58, 88);
+          const lightness = rand(42, 58);
+          color = hslToHex(hue, saturation, lightness);
         }
-        return color || playerPalette[0];
+        return color || "#2e90fa";
       }
 
       function actorById(id) {
@@ -660,7 +662,7 @@
         let clone = localCloneActor();
         if (!clone) {
           state.localCloneIndex = 1;
-          clone = createActor("local-clone-1", localProfileName(true), botPalette[1 % botPalette.length], true, "local");
+          clone = createActor("local-clone-1", localProfileName(true), randomActorColor(), true, "local");
           clone.localClone = true;
           state.actors.push(clone);
           spawnLocalActorBeside(clone, main);
@@ -748,7 +750,7 @@
         const index = state.nextBotIndex;
         state.nextBotIndex += 1;
         const botName = `${botNames[index % botNames.length]} ${String(index + 1).padStart(2, "0")}`;
-        const bot = createActor(`bot-${index}`, botName, botPalette[index % botPalette.length]);
+        const bot = createActor(`bot-${index}`, botName, randomActorColor());
         state.actors.push(bot);
         const mass = botSpawnMass();
         const pos = findBotSpawnPosition(mass);
