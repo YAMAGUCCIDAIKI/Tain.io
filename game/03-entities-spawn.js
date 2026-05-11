@@ -140,13 +140,13 @@
       function virusBurstPieceCount(total, slots, liveCells) {
         if (slots <= 1) return 1;
         if (liveCells === MAX_CELLS - 1) return 2;
-        let pieces = 2;
-        let splitSide = total * 0.6;
-        while (pieces < slots && splitSide * 0.5 >= MIN_CELL_MASS) {
-          splitSide *= 0.5;
-          pieces += 1;
+        let best = 2;
+        for (let candidate = 2; candidate <= slots; candidate += 1) {
+          const masses = virusBurstMasses(total, candidate, false);
+          if (masses.every((mass) => mass + 0.001 >= MIN_CELL_MASS)) best = candidate;
+          else break;
         }
-        return pieces;
+        return best;
       }
 
       function virusBurstMasses(total, count, forceHalf = false) {
@@ -156,6 +156,12 @@
         const masses = [total * 0.4];
         let splitSide = total * 0.6;
         while (masses.length < count - 1) {
+          const remainingSlots = count - masses.length;
+          if (splitSide * 0.5 < MIN_SPLIT_SOURCE_MASS) {
+            const tailMass = splitSide / remainingSlots;
+            while (masses.length < count) masses.push(tailMass);
+            return masses;
+          }
           splitSide *= 0.5;
           masses.push(splitSide);
         }

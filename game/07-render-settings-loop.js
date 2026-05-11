@@ -294,7 +294,7 @@
           ctx.fill();
         }
 
-        detailCellsScratch.sort(compareCellsForDraw);
+        detailCellsScratch.sort((a, b) => a.radius - b.radius);
         for (const cell of detailCellsScratch) drawCell(cell, renderMode);
       }
 
@@ -373,27 +373,11 @@
         for (const cell of renderCellsScratch) {
           renderSizedEntitiesScratch.push({ type: "cell", radius: cell.radius, entity: cell });
         }
-        renderSizedEntitiesScratch.sort(compareSizedEntitiesForDraw);
+        renderSizedEntitiesScratch.sort((a, b) => a.radius - b.radius);
         for (const item of renderSizedEntitiesScratch) {
           if (item.type === "virus") drawVirus(item.entity, renderMode);
           else drawCell(item.entity, renderMode);
         }
-      }
-
-      function compareCellsForDraw(a, b) {
-        const radiusDiff = a.radius - b.radius;
-        if (Math.abs(radiusDiff) > 0.001) return radiusDiff;
-        const priorityDiff = (a.splitPriority || 0) - (b.splitPriority || 0);
-        if (priorityDiff !== 0) return priorityDiff;
-        return (a.id || 0) - (b.id || 0);
-      }
-
-      function compareSizedEntitiesForDraw(a, b) {
-        const radiusDiff = a.radius - b.radius;
-        if (Math.abs(radiusDiff) > 0.001) return radiusDiff;
-        if (a.type === "cell" && b.type === "cell") return compareCellsForDraw(a.entity, b.entity);
-        if (a.type !== b.type) return a.type === "virus" ? 1 : -1;
-        return ((a.entity && a.entity.id) || 0) - ((b.entity && b.entity.id) || 0);
       }
 
       function draw() {
