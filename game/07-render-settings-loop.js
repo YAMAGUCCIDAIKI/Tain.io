@@ -602,7 +602,7 @@
       }
 
       function setWorldSetting(kind, value) {
-        if (kind === "botMode") state.settings.botMode = ["hunt", "chase", "virus", "cursor"].includes(value) ? value : "hunt";
+        if (kind === "botMode") state.settings.botMode = ["hunt", "chase", "virus", "cursor", "eject"].includes(value) ? value : "hunt";
         if (kind === "cursorLine") state.settings.cursorLine = Boolean(value);
         if (kind === "nRespawn") state.settings.nRespawnEnabled = Boolean(value);
         if (kind === "activeColor") state.settings.activeColorHighlight = Boolean(value);

@@ -562,7 +562,7 @@
           const saved = prefs.settings;
           if (saved.botEnabled != null) state.settings.botEnabled = Boolean(saved.botEnabled);
           if (Number.isFinite(saved.botTarget)) state.settings.botTarget = clamp(roundSliderValue("bot", saved.botTarget), state.settings.min.bot, state.settings.max.bot);
-          if (["hunt", "chase", "virus", "cursor"].includes(saved.botMode)) state.settings.botMode = saved.botMode;
+          if (["hunt", "chase", "virus", "cursor", "eject"].includes(saved.botMode)) state.settings.botMode = saved.botMode;
           if (Number.isFinite(saved.virusTarget)) state.settings.virusTarget = clamp(roundSliderValue("virus", saved.virusTarget), state.settings.min.virus, state.settings.max.virus);
           if (Number.isFinite(saved.foodTarget)) state.settings.foodTarget = clamp(roundSliderValue("food", saved.foodTarget), state.settings.min.food, state.settings.max.food);
           if (Number.isFinite(saved.spawnMass)) state.settings.spawnMass = clamp(roundSliderValue("spawnMass", saved.spawnMass), state.settings.min.spawnMass, state.settings.max.spawnMass);

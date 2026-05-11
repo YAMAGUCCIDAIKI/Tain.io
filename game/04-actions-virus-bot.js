@@ -187,6 +187,26 @@
         refreshCell(cell);
       }
 
+      function runEjectBotMode(bot, now) {
+        const liveCells = bot.cells.filter((cell) => !cell.dead);
+        const canEject = liveCells.some((cell) => cell.mass >= MIN_EJECT_SOURCE_MASS);
+        if (!canEject) {
+          spawnActor(bot, playerSpawnMass());
+          return true;
+        }
+
+        const center = actorCenter(bot);
+        const baseAngle = (bot.respawns * 0.61 + state.frameIndex * 0.17) % TAU;
+        for (let i = 0; i < liveCells.length; i += 1) {
+          const cell = liveCells[i];
+          const angle = baseAngle + i * TAU / Math.max(1, liveCells.length);
+          cell.targetX = clamp(center.x + Math.cos(angle) * 520, 80, WORLD_SIZE - 80);
+          cell.targetY = clamp(center.y + Math.sin(angle) * 520, 80, WORLD_SIZE - 80);
+        }
+        ejectMass(bot, now, true);
+        return true;
+      }
+
       function explodeCellOnVirus(actor, cell, virus) {
         const liveCells = liveCellCount(actor);
         if (liveCells >= MAX_CELLS) {
@@ -278,6 +298,8 @@
         bot.aiTimer -= dt;
         if (bot.aiTimer > 0) return;
         bot.aiTimer = rand(0.16, 0.32);
+
+        if (state.settings.botMode === "eject" && runEjectBotMode(bot, now)) return;
 
         const center = actorCenter(bot);
         if (distSq(center.x, center.y, bot.wanderX, bot.wanderY) < 160 * 160 || Math.random() < 0.03) {
