@@ -323,12 +323,14 @@
       }
 
       function spawnClearanceScore(x, y, radius, options = {}) {
-        let score = Math.min(
-          x - radius,
-          y - radius,
-          WORLD_SIZE - radius - x,
-          WORLD_SIZE - radius - y
-        );
+        let score = options.ignoreWallClearance
+          ? Infinity
+          : Math.min(
+            x - radius,
+            y - radius,
+            WORLD_SIZE - radius - x,
+            WORLD_SIZE - radius - y
+          );
 
         if (options.avoidX != null && options.avoidY != null) {
           score = Math.min(score, Math.sqrt(distSq(x, y, options.avoidX, options.avoidY)) - (options.avoidRadius || 0));
@@ -402,6 +404,16 @@
           avoidViruses: true,
           virusPadding: 130,
           cellPadding: 180
+        });
+      }
+
+      function findBotSpawnPosition(mass) {
+        const radius = radiusFromMass(mass);
+        return findOpenSpawnPosition(radius, Math.max(8, radius * 0.67), 80, {
+          avoidViruses: true,
+          virusPadding: 90,
+          cellPadding: 140,
+          ignoreWallClearance: true
         });
       }
 

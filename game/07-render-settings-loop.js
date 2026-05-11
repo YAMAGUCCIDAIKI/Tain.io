@@ -1248,24 +1248,6 @@
         state.virusRespawnQueue.length = 0;
         const virusTarget = state.settings.virusTarget;
         if (virusTarget <= 0) return;
-        const columns = Math.ceil(Math.sqrt(virusTarget));
-        const rows = Math.ceil(virusTarget / columns);
-        const margin = 420;
-        const stepX = (WORLD_SIZE - margin * 2) / Math.max(1, columns - 1);
-        const stepY = (WORLD_SIZE - margin * 2) / Math.max(1, rows - 1);
-        const jitterX = Math.min(34, stepX * 0.22);
-        const jitterY = Math.min(34, stepY * 0.22);
-
-        for (let row = 0; row < rows && state.viruses.length < virusTarget; row += 1) {
-          for (let column = 0; column < columns && state.viruses.length < virusTarget; column += 1) {
-            const x = margin + column * stepX + rand(-jitterX, jitterX);
-            const y = margin + row * stepY + rand(-jitterY, jitterY);
-            if (distSq(x, y, avoidX, avoidY) < 560 * 560) continue;
-            if (!virusSpawnIsSafe(x, y)) continue;
-            state.viruses.push(createVirus(x, y));
-          }
-        }
-
         while (state.viruses.length < virusTarget) {
           state.viruses.push(spawnVirusSafely(avoidX, avoidY));
         }

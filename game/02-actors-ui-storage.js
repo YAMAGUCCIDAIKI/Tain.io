@@ -750,7 +750,9 @@
         const botName = `${botNames[index % botNames.length]} ${String(index + 1).padStart(2, "0")}`;
         const bot = createActor(`bot-${index}`, botName, botPalette[index % botPalette.length]);
         state.actors.push(bot);
-        spawnActor(bot, botSpawnMass());
+        const mass = botSpawnMass();
+        const pos = findBotSpawnPosition(mass);
+        spawnActor(bot, mass, pos.x, pos.y);
         return bot;
       }
 
